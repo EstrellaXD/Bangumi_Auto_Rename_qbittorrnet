@@ -42,6 +42,7 @@ class TorrentManager(Database):
             with DownloadClient() as client:
                 self.rss.delete(data.official_title)
                 self.bangumi.delete_one(int(_id))
+                self.torrent.delete_by_bangumi_id(int(_id))
                 if file:
                     torrent_message = self.delete_torrents(data, client)
                 logger.info(f"[Manager] Delete rule for {data.official_title}")

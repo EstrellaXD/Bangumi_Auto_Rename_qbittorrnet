@@ -3,6 +3,7 @@ import logging
 from module.conf import settings
 from module.models import Bangumi, Torrent
 from module.network import RequestContent
+from module.utils import torrent_hash
 
 from .path import TorrentPath
 
@@ -120,21 +121,35 @@ class DownloadClient(TorrentPath):
         with RequestContent() as req:
             if isinstance(torrent, list):
                 if len(torrent) == 0:
-                    logger.debug(f"[Downloader] No torrent found: {bangumi.official_title}")
+                    logger.debug(
+                        f"[Downloader] No torrent found: {bangumi.official_title}"
+                    )
                     return False
                 if "magnet" in torrent[0].url:
-                    torrent_url = [t.url for t in torrent]
+                    torrent_url = []
+                    for t in torrent:
+                        torrent_url.append(t.url)
+                        t.hash = torrent_hash.from_magnet(t.url)
                     torrent_file = None
                 else:
-                    torrent_file = [req.get_content(t.url) for t in torrent]
+                    torrent_file = []
+                    for t in torrent:
+                        content = req.get_content(t.url)
+                        torrent_file.append(content)
+                        t.hash = torrent_hash.from_torrent(content)
                     torrent_url = None
+                for t in torrent:
+                    t.bangumi_id = bangumi.id
             else:
                 if "magnet" in torrent.url:
                     torrent_url = torrent.url
+                    torrent.hash = torrent_hash.from_magnet(torrent.url)
                     torrent_file = None
                 else:
                     torrent_file = req.get_content(torrent.url)
+                    torrent.hash = torrent_hash.from_torrent(torrent_file)
                     torrent_url = None
+                torrent.bangumi_id = bangumi.id
         if self.client.add_torrents(
             torrent_urls=torrent_url,
             torrent_files=torrent_file,

@@ -1,6 +1,7 @@
 import logging
+from typing import Optional
 
-from sqlmodel import Session, select
+from sqlmodel import Session, select, and_, desc
 
 from module.models import Torrent
 
@@ -55,3 +56,18 @@ class TorrentDatabase:
             if torrent.url not in old_urls:
                 new_torrents.append(torrent)
         return new_torrents
+
+    def get_bangumi_id(self, torrent_hash: str) -> Optional[int]:
+        return self.session.exec(
+            select(Torrent.bangumi_id)
+            .where(and_(Torrent.hash == torrent_hash, Torrent.bangumi_id.isnot(None)))
+            .order_by(desc(Torrent.id))
+        ).first()
+
+    def delete_by_bangumi_id(self, bangumi_id: int):
+        statement = select(Torrent).where(Torrent.bangumi_id == bangumi_id)
+        torrents = self.session.exec(statement).all()
+        for torrent in torrents:
+            logger.debug(f"[Database] Delete torrent name: {torrent.name}.")
+            self.session.delete(torrent)
+        self.session.commit()

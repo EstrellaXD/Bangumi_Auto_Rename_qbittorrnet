@@ -2,11 +2,13 @@ import logging
 from pathlib import Path
 
 import requests
+from sqlalchemy import inspect
 
 from module.conf import VERSION, settings
 from module.downloader import DownloadClient
 from module.models import Config
 from module.update import version_check
+from module.database import Database
 
 logger = logging.getLogger(__name__)
 
@@ -83,3 +85,16 @@ class Checker:
         else:
             img_path.mkdir()
             return False
+
+    @staticmethod
+    def check_torrent_hash() -> bool:
+        with Database() as db:
+            inspector = inspect(db.engine)
+            columns = inspector.get_columns("torrent")
+            if any(column["name"] == "hash" for column in columns):
+                for torrent in db.torrent.search_all():
+                    if torrent.hash is None and torrent.bangumi_id:
+                        return False
+                return True
+            else:
+                return False

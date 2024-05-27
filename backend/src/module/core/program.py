@@ -2,7 +2,14 @@ import logging
 
 from module.conf import VERSION, settings
 from module.models import ResponseModel
-from module.update import data_migration, first_run, from_30_to_31, start_up, cache_image
+from module.update import (
+    data_migration,
+    first_run,
+    from_30_to_31,
+    start_up,
+    cache_image,
+    torrent_migration,
+)
 
 from .sub_thread import RenameThread, RSSThread
 
@@ -49,6 +56,11 @@ class Program(RenameThread, RSSThread):
         if not self.img_cache:
             logger.info("[Core] No image cache exists, create image cache.")
             cache_image()
+        if not self.torrent_hash:
+            logger.info(
+                "[Core] The hash field of the torrent table does not exist or its value is empty, get torrent hash."
+            )
+            torrent_migration()
         self.start()
 
     def start(self):

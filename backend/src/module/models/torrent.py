@@ -12,6 +12,7 @@ class Torrent(SQLModel, table=True):
     url: str = Field("https://example.com/torrent", alias="url")
     homepage: Optional[str] = Field(None, alias="homepage")
     downloaded: bool = Field(False, alias="downloaded")
+    hash: Optional[str] = Field(None, alias="hash")
 
 
 class TorrentUpdate(SQLModel):

@@ -27,3 +27,4 @@ sqlmodel==0.0.8
 sse-starlette==1.6.5
 semver==3.0.1
 openai==0.28.1
+torrentool==1.2.0

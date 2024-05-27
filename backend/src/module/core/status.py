@@ -58,3 +58,7 @@ class ProgramStatus(Checker):
     @property
     def img_cache(self):
         return self.check_img_cache()
+
+    @property
+    def torrent_hash(self):
+        return self.check_torrent_hash()

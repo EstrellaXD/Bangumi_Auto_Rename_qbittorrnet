@@ -53,8 +53,8 @@ class SeasonCollector(DownloadClient):
             engine.add_rss(
                 rss_link=data.rss_link, name=data.official_title, aggregate=False
             )
-            result = engine.download_bangumi(data)
             engine.bangumi.add(data)
+            result = engine.download_bangumi(data)
             return result
 
 
