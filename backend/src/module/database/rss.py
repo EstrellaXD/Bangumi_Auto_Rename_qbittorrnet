@@ -80,6 +80,9 @@ class RSSDatabase:
             select(RSSItem).where(and_(RSSItem.aggregate, RSSItem.enabled))
         ).all()
 
+    def search_url(self, url: str) -> RSSItem | None:
+        return self.session.exec(select(RSSItem).where(RSSItem.url == url)).first()
+
     def delete(self, _id: int) -> bool:
         condition = delete(RSSItem).where(RSSItem.id == _id)
         try:

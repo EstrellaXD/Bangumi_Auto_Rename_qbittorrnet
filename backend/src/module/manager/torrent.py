@@ -40,7 +40,12 @@ class TorrentManager(Database):
         data = self.bangumi.search_id(int(_id))
         if isinstance(data, Bangumi):
             with DownloadClient() as client:
-                self.rss.delete(data.official_title)
+                rss_links = filter(None, data.rss_link.split(","))
+                for rss_link in rss_links:
+                    rss = self.rss.search_url(rss_link)
+                    if rss is None or rss.aggregate:
+                        continue
+                    self.rss.delete(rss.id)
                 self.bangumi.delete_one(int(_id))
                 if file:
                     torrent_message = self.delete_torrents(data, client)
