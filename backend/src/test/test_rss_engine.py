@@ -14,5 +14,7 @@ def test_rss_engine():
 
         new_torrents = engine.pull_rss(result[1])
         torrent = new_torrents[0]
-        assert torrent.name == "[Lilith-Raws] 无职转生，到了异世界就拿出真本事 / Mushoku Tensei - 11 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4]"
-
+        assert (
+            torrent.name
+            == "[Lilith-Raws] 无职转生，到了异世界就拿出真本事 / Mushoku Tensei - 11 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4]"
+        )

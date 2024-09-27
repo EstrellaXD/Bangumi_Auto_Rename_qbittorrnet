@@ -9,6 +9,7 @@ from .plugin import (
     ServerChanNotification,
     TelegramNotification,
     WecomNotification,
+    WecomRobotNotification,
 )
 
 logger = logging.getLogger(__name__)
@@ -23,6 +24,8 @@ def getClient(type: str):
         return BarkNotification
     elif type.lower() == "wecom":
         return WecomNotification
+    elif type.lower() == "wecom-robot":
+        return WecomRobotNotification
     else:
         return None
 
@@ -43,8 +46,9 @@ class PostNotification:
     def send_msg(self, notify: Notification) -> bool:
         self._get_poster(notify)
         try:
-            self.notifier.post_msg(notify)
+            resp = self.notifier.post_msg(notify)
             logger.debug(f"Send notification: {notify.official_title}")
+            return resp
         except Exception as e:
             logger.warning(f"Failed to send notification: {e}")
             return False
