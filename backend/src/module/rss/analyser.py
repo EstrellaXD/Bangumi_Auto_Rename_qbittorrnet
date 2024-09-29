@@ -31,7 +31,8 @@ class RSSAnalyser(TitleParser):
             bangumi.poster_link = poster_link
         else:
             pass
-        bangumi.official_title = re.sub(r"[/:.\\]", " ", bangumi.official_title)
+        if bangumi.official_title:
+            bangumi.official_title = re.sub(r"[/:.\\]", " ", bangumi.official_title)
 
     @staticmethod
     def get_rss_torrents(rss_link: str, full_parse: bool = True) -> list[Torrent]:
