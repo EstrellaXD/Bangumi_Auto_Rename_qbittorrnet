@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 EPISODE_RE = re.compile(r"\d+")
 TITLE_RE = re.compile(
-    r"(.*|\[.*])( -? \d+|\[\d+]|\[\d+.?[vV]\d]|第\d+[话話集]|\[第?\d+[话話集]]|\[\d+.?END]|[Ee][Pp]?\d+)(.*)"
+    r"(.*?|\[.*])((?: -)? \d+ |\[\d+]|\[\d+.?[vV]\d]|第\d+[话話集]|\[第?\d+[话話集]]|\[\d+.?END]|[Ee][Pp]?\d+)(.*)"
 )
 RESOLUTION_RE = re.compile(r"1080|720|2160|4K")
 SOURCE_RE = re.compile(r"B-Global|[Bb]aha|[Bb]ilibili|AT-X|Web")
