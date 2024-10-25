@@ -73,7 +73,7 @@ class SearchTorrent:
                     exist_list.append(special_link)
                     bangumi_list.append(
                         json.dumps(
-                            bangumi.model_dump(),
+                            bangumi.dict(),
                             separators=(",", ":"),
                         )
                     )
