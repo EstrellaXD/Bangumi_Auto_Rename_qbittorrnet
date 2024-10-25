@@ -32,4 +32,3 @@ sse-starlette==1.6.5
 starlette==0.40.0
 typing_extensions==4.12.2
 urllib3==2.2.3
-uvicorn==0.32.0
