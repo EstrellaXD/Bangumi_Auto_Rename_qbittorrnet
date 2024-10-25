@@ -15,7 +15,6 @@ httpx[http2,socks]==0.27.2
 hyperframe==6.0.1
 idna==3.10
 Jinja2==3.1.4
-MarkupSafe==3.0.2
 packaging==24.1
 passlib==1.7.4
 platformdirs==4.2.2
