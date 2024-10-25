@@ -1,6 +1,6 @@
+beautifulsoup4==4.12.3
 anyio==3.7.0
 bencode.py ==4.0.0
-bs4==0.0.1
 certifi==2023.5.7
 fastapi==0.115.2
 h11==0.14.0
@@ -21,4 +21,3 @@ python-multipart==0.0.6
 sqlmodel==0.0.22
 sse-starlette==1.6.5
 semver==3.0.1
-beautifulsoup4==4.12.3
