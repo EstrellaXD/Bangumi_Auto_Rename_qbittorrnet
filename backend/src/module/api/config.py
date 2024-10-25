@@ -21,13 +21,16 @@ async def get_config():
 )
 async def update_config(config: Config):
     try:
-        settings.save(config_dict=config.model_dump())
+        settings.save(config_dict=config.dict())
         settings.load()
         # update_rss()
         logger.info("Config updated")
         return JSONResponse(
             status_code=200,
-            content={"msg_en": "Update config successfully.", "msg_zh": "更新配置成功。"},
+            content={
+                "msg_en": "Update config successfully.",
+                "msg_zh": "更新配置成功。",
+            },
         )
     except Exception as e:
         logger.warning(e)

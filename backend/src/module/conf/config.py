@@ -150,7 +150,7 @@ class Settings(Config):
 
     def save(self, config_dict: dict | None = None):
         if not config_dict:
-            config_dict = self.model_dump()
+            config_dict = self.dict()
         with open(CONFIG_PATH, "w", encoding="utf-8") as f:
             json.dump(config_dict, f, indent=4, ensure_ascii=False)
 
@@ -160,7 +160,7 @@ class Settings(Config):
         self.save()
 
     def __load_from_env(self):
-        config_dict = self.model_dump()
+        config_dict = self.dict()
         for key, section in ENV_TO_ATTR.items():
             for env, attr in section.items():
                 if env in os.environ:
