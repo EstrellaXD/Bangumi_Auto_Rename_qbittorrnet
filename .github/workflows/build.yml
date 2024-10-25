@@ -5,18 +5,18 @@ on:
     types:
       - closed
     branches:
-      - main
+      - aio_test
   push:
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python 3.11
         uses: actions/setup-python@v3
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -28,11 +28,48 @@ jobs:
           mkdir -p config
           pytest
 
+  webui-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: 9
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v4
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: cd webui && pnpm install
+
+      - name: build test
+        run: |
+          cd webui && pnpm test:build
+
   version-info:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: If release
         id: release
         run: |
@@ -79,25 +116,33 @@ jobs:
 
   build-webui:
     runs-on: ubuntu-latest
-    needs: [ test, version-info ]
+    needs: [test, webui-test, version-info]
     if: ${{ needs.version-info.outputs.release == 1 || needs.version-info.outputs.dev == 1 }}
-    strategy:
-      matrix:
-        node-version: [ 18 ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-
-      - uses: pnpm/action-setup@v2
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
         with:
-          version: 8
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+          node-version: 20
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          cache-dependency-path: webui/pnpm-lock.yaml
+          version: 9
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v4
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
         run: cd webui && pnpm install
@@ -114,10 +159,10 @@ jobs:
 
   build-docker:
     runs-on: ubuntu-latest
-    needs: [ build-webui, version-info ]
+    needs: [build-webui, version-info]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Create Version info via tag
         working-directory: ./backend/src
@@ -138,7 +183,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            estrellaxd/auto_bangumi
+            shinonomeow/auto_bangumi
             ghcr.io/${{ github.repository }}
           tags: |
             type=raw,value=${{ needs.version-info.outputs.version }}
@@ -150,7 +195,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            estrellaxd/auto_bangumi
+            shinonomeow/auto_bangumi
             ghcr.io/${{ github.repository }}
           tags: |
             type=raw,value=${{ needs.version-info.outputs.version }}
@@ -211,20 +256,20 @@ jobs:
           builder: ${{ steps.buildx.output.name }}
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: false
-          tags: estrellaxd/auto_bangumi:test
+          tags: shinonomeow/auto_bangumi:test
           cache-from: type=gha, scope=${{ github.workflow }}
           cache-to: type=gha, scope=${{ github.workflow }}
 
   release:
     runs-on: ubuntu-latest
-    needs: [ build-docker, version-info ]
+    needs: [build-docker, version-info]
     if: ${{ needs.version-info.outputs.release == 1 }}
     outputs:
       url: ${{ steps.release.outputs.url }}
       version: ${{ needs.version-info.outputs.version }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download artifact webui
         uses: actions/download-artifact@v3
@@ -247,11 +292,10 @@ jobs:
         run: |
           echo ${{ needs.version-info.outputs.version }}
           echo "VERSION='${{ needs.version-info.outputs.version }}'" >> module/__version__.py
-          
+
       - name: Copy requirements.txt
         working-directory: ./backend
-        run:
-          cp requirements.txt src/requirements.txt
+        run: cp requirements.txt src/requirements.txt
 
       - name: Zip app
         run: |
@@ -267,7 +311,7 @@ jobs:
             echo "version=🌟${{ needs.version-info.outputs.version }}" >> $GITHUB_OUTPUT
             echo "pre_release=false" >> $GITHUB_OUTPUT
           fi
-          
+
       - name: Release
         id: release
         uses: softprops/action-gh-release@v1
@@ -282,17 +326,3 @@ jobs:
             backend/app-v${{ needs.version-info.outputs.version }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-
-
-  telegram:
-    runs-on: ubuntu-latest
-    needs: [ release ]
-    steps:
-      - name: send telegram message on push
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: |
-            New release: ${{ needs.release.outputs.version }}
-            Link: ${{ needs.release.outputs.url }}
