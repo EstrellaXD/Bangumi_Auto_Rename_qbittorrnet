@@ -243,7 +243,7 @@ class Renamer:
         async with DownloadClient() as client:
             # 获取AB 下载的种子详细信息,主要是获取 save_path
             # save_path 以 download 查询的为准
-            bangumi_torrent_infos: list[dict] = await client.get_torrent_info(limit=50)
+            bangumi_torrent_infos: list[dict] = await client.get_torrent_info(limit=100)
             renamer_info_list: list[tuple[Torrent, Bangumi, list[str]]] = []
 
             for bangumi_torrent_info in bangumi_torrent_infos:

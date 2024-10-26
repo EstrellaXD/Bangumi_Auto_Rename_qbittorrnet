@@ -17,7 +17,7 @@ def setup_logger(level: int = logging.INFO, reset: bool = False):
     logging.addLevelName(logging.DEBUG, "DEBUG:")
     logging.addLevelName(logging.INFO, "INFO:")
     logging.addLevelName(logging.WARNING, "WARNING:")
-    LOGGING_FORMAT = "[%(asctime)s] %(levelname)-8s  %(message)s"
+    LOGGING_FORMAT = "[%(asctime)s] %(levelname)-8s %(message)s"
     TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
     logging.basicConfig(
         level=level,
@@ -29,14 +29,18 @@ def setup_logger(level: int = logging.INFO, reset: bool = False):
             logging.StreamHandler(),
         ],
     )
-    # 全部无效
-    for logger_name in ["httpx", "httpcore"]:
+    loggers_to_silence = [
+        "httpx",
+        "httpcore",
+        "hpack",
+        "hpack.hpack",
+    ]
+    for logger_name in loggers_to_silence:
         logger = logging.getLogger(logger_name)
         logger.setLevel(logging.WARNING)
-        logger.propagate = False
-        logger.addHandler(logging.NullHandler())
-    logging.getLogger("urllib3").setLevel(logging.WARNING)
-    logging.getLogger("requests").setLevel(logging.WARNING)
+        # logger.propagate = False
+        # logger.handlers = [NullHandler()]
+
     # 完全抑制 httpx 的日志输出
     # httpx_logger = logging.getLogger("httpx")
     # http_coro_logger = logging.getLogger("httpcore")

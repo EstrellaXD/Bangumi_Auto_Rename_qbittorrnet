@@ -101,6 +101,8 @@ class Downloader:
             "filter": status_filter,
             "category": category,
             "tag": tag,
+            "sort": "completion_on",
+            "reverse": True,
         }
         if limit:
             data.update({"limit": limit})
