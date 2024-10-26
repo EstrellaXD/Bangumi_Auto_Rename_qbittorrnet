@@ -145,18 +145,18 @@ class Renamer:
             file_type=file_type,
             season=season,
         )
-        print(ep)
         if ep.episode and isinstance(ep.episode, float):
             # and isinstance(ep.episode, float) and ep.episode.is_integer():
-            print("--------------")
             ep.episode = int(ep.episode)
             return False
         # 番剧偏移
         ep.episode += bangumi.offset if bangumi else 0
 
         new_path = self.gen_path(ep, bangumi_name, method)
-        print("start ep")
         old_path = file_path
+        if new_path == old_path:
+            logging.debug(f"[Renamer] have renamed {old_path}")
+            return True
 
         logger.debug(f"[Renamer] {old_path=} ->{new_path=}")
         result = await client.rename_torrent_file(hash, old_path, new_path)

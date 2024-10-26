@@ -184,7 +184,7 @@ class RSSEngine:
     def get_active_rss(self) -> list[RSSItem]:
         """获取所有活跃的rss"""
         with Database(self.engine) as database:
-            rss_items = database.rss.search_all()
+            rss_items = database.rss.search_active()
         return rss_items
 
     async def refresh_rss(
