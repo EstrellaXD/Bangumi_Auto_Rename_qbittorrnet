@@ -61,10 +61,8 @@ class Program(RenameThread, RSSThread):
     async def start(self):
         self.stop_event.clear()
         settings.load()
-        while not self.downloader_status:
-            logger.warning("Downloader is not running.")
-            logger.info("Waiting for downloader to start.")
-            await asyncio.sleep(30)
+        if not self.downloader_status:
+            logger.warning("Unable to connect to the downloader, some features may not be available until connected.")
         if self.enable_renamer:
             self.rename_start()
         if self.enable_rss:
