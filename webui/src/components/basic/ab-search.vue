@@ -28,11 +28,11 @@ watch(inputValue, (val) => {
     bg="#7752B4"
     text-white
     fx-cer
-    rounded-12px
-    h-36px
-    pl-12px
-    space-x-12px
-    w-400px
+    rounded-12
+    h-36
+    pl-12
+    gap-x-12
+    w-400
     overflow-hidden
     shadow-inner
   >
@@ -58,8 +58,8 @@ watch(inputValue, (val) => {
       h-full
       f-cer
       justify-between
-      px-12px
-      w-100px
+      px-12
+      w-100
       class="provider"
       is-btn
       @click="$emit('select')"

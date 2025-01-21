@@ -10,25 +10,25 @@ const checked = defineModel<boolean>('checked', {
   <Switch v-model="checked" as="template">
     <div
       is-btn
-      w-48px
-      h-28px
+      w-48
+      h-28
       rounded-full
       rel
       flex="inline items-center"
       transition-colors
       duration-300
-      p-3px
+      p-3
       shadow="~ inset"
       class="box"
       :class="{ checked }"
     >
       <div
-        wh-22px
+        wh-22
         rounded="1/2"
         transition-all
         duration-300
         class="slider"
-        :class="{ checked, 'translate-x-20px': checked }"
+        :class="{ checked, 'translate-x-20': checked }"
       ></div>
     </div>
   </Switch>

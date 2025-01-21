@@ -1,4 +1,12 @@
-<script lang="ts" setup>
+<script lang="tsx" setup>
+import { NDataTable } from 'naive-ui';
+import type { RSS } from '#/rss';
+
+definePage({
+  name: 'RSS',
+});
+
+const { t } = useMyI18n();
 const { rss, selectedRSS } = storeToRefs(useRSSStore());
 const { getAll, deleteSelected, disableSelected, enableSelected } =
   useRSSStore();
@@ -6,52 +14,76 @@ const { getAll, deleteSelected, disableSelected, enableSelected } =
 onActivated(() => {
   getAll();
 });
-definePage({
-  name: 'RSS',
-});
 
-function addSelected(checked: boolean, id: number) {
-  if (!checked) {
-    selectedRSS.value.push(id);
-  } else {
-    selectedRSS.value = selectedRSS.value.filter((i) => i !== id);
-  }
-}
+const RSSTableOptions = computed(() => {
+  const columns = [
+    {
+      type: 'selection',
+    },
+    {
+      title: t('rss.name'),
+      key: 'name',
+      className: 'text-h3',
+      ellipsis: {
+        tooltip: true,
+      },
+    },
+    {
+      title: t('rss.url'),
+      key: 'url',
+      className: 'text-h3',
+      minWidth: 400,
+      align: 'center',
+      ellipsis: {
+        tooltip: true,
+      },
+    },
+    {
+      title: t('rss.status'),
+      key: 'status',
+      className: 'text-h3',
+      align: 'right',
+      minWidth: 200,
+      render(rss: RSS) {
+        return (
+          <div flex="~ justify-end gap-x-8">
+            {rss.parser && <ab-tag type="primary" title={rss.parser} />}
+            {rss.aggregate && <ab-tag type="primary" title="aggregate" />}
+            {rss.enabled ? (
+              <ab-tag type="active" title="active" />
+            ) : (
+              <ab-tag type="inactive" title="inactive" />
+            )}
+          </div>
+        );
+      },
+    },
+  ];
+
+  const rowKey = (rss: RSS) => rss.id;
+
+  return {
+    columns,
+    data: rss.value,
+    pagination: false,
+    bordered: false,
+    rowKey,
+    maxHeight: 500,
+  } as unknown as InstanceType<typeof NDataTable>;
+});
 </script>
 
 <template>
-  <div overflow-auto mt-12px flex-grow>
+  <div overflow-auto mt-12 flex-grow>
     <ab-container :title="$t('rss.title')">
-      <div flex justify-between>
-        <div flex space-x-40px>
-          <div text-h3>{{ $t('rss.selectbox') }}</div>
-          <div class="spacer-1"></div>
-          <div text-h3>{{ $t('rss.name') }}</div>
-          <div class="spacer-2"></div>
-          <div text-h3>{{ $t('rss.url') }}</div>
-        </div>
-        <div>
-          <div text-h3>{{ $t('rss.status') }}</div>
-        </div>
-      </div>
-      <div line my-12px></div>
-      <div space-y-12px>
-        <ab-rss-item
-          v-for="i in rss"
-          :id="i.id"
-          :key="i.id"
-          :name="i.name"
-          :url="i.url"
-          :enable="i.enabled"
-          :parser="i.parser"
-          :aggregate="i.aggregate"
-          @on-select="addSelected"
-        >
-        </ab-rss-item>
-      </div>
+      <NDataTable
+        v-bind="RSSTableOptions"
+        @update:checked-row-keys="(e) => (selectedRSS = (e as number[]))"
+      ></NDataTable>
+
       <div v-if="selectedRSS.length > 0">
-        <div line my-12px></div>
-        <div flex="~ justify-end" space-x-10px>
+        <div line my-12></div>
+        <div flex="~ justify-end gap-x-10">
           <ab-button @click="enableSelected">{{ $t('rss.enable') }}</ab-button>
           <ab-button @click="disableSelected">{{
             $t('rss.disable')
@@ -64,13 +96,3 @@ function addSelected(checked: boolean, id: number) {
     </ab-container>
   </div>
 </template>
-
-<style lang="scss" scoped>
-.spacer-1 {
-  width: 32px;
-}
-
-.spacer-2 {
-  width: 200px;
-}
-</style>

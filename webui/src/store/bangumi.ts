@@ -1,10 +1,7 @@
 import type { BangumiRule } from '#/bangumi';
 import { ruleTemplate } from '#/bangumi';
-import type { ApiSuccess } from '#/api';
 
 export const useBangumiStore = defineStore('bangumi', () => {
-  const message = useMessage();
-
   const bangumi = ref<BangumiRule[]>();
   const editRule = reactive<{
     show: boolean;
@@ -14,51 +11,33 @@ export const useBangumiStore = defineStore('bangumi', () => {
     item: ruleTemplate,
   });
 
-  const { execute: getAll, onResult: onBangumiResult } = useApi(
-    apiBangumi.getAll
-  );
-  const { execute: updateRule, onResult: onUpdateRuleResult } = useApi(
-    apiBangumi.updateRule
-  );
-  const { execute: enableRule, onResult: onEnableRuleResult } = useApi(
-    apiBangumi.enableRule
-  );
-  const { execute: disableRule, onResult: onDisableRuleResult } = useApi(
-    apiBangumi.disableRule
-  );
-  const { execute: deleteRule, onResult: onDeleteRuleResult } = useApi(
-    apiBangumi.deleteRule
-  );
-  const { execute: refreshPoster, onResult: onRefreshPosterResult } = useApi(
-    apiBangumi.refreshPoster
-  );
-
-  onBangumiResult((res) => {
-    function sort(arr: BangumiRule[]) {
-      return arr.sort((a, b) => b.id - a.id);
-    }
+  async function getAll() {
+    const res = await apiBangumi.getAll();
+    const sort = (arr: BangumiRule[]) => arr.sort((a, b) => b.id - a.id);
 
     const enabled = sort(res.filter((e) => !e.deleted));
     const disabled = sort(res.filter((e) => e.deleted));
 
     bangumi.value = [...enabled, ...disabled];
-  });
+  }
 
-  function refresh() {
+  function refreshData() {
     editRule.show = false;
     getAll();
   }
 
-  function actionSuccess(apiRes: ApiSuccess) {
-    message.success(apiRes.msg_en);
-    refresh();
-  }
+  const opts = {
+    showMessage: true,
+    onSuccess() {
+      refreshData();
+    },
+  };
 
-  onUpdateRuleResult(actionSuccess);
-  onDisableRuleResult(actionSuccess);
-  onEnableRuleResult(actionSuccess);
-  onDeleteRuleResult(actionSuccess);
-  onRefreshPosterResult(actionSuccess);
+  const { execute: updateRule } = useApi(apiBangumi.updateRule, opts);
+  const { execute: enableRule } = useApi(apiBangumi.enableRule, opts);
+  const { execute: disableRule } = useApi(apiBangumi.disableRule, opts);
+  const { execute: deleteRule } = useApi(apiBangumi.deleteRule, opts);
+  const { execute: refreshPoster } = useApi(apiBangumi.refreshPoster, opts);
 
   function openEditPopup(data: BangumiRule) {
     editRule.show = true;
@@ -70,11 +49,14 @@ export const useBangumiStore = defineStore('bangumi', () => {
     id: number,
     deleteFile: boolean
   ) {
-    if (type === 'disable') {
-      disableRule(id, deleteFile);
-    }
-    if (type === 'delete') {
-      deleteRule(id, deleteFile);
+    switch (type) {
+      case 'disable':
+        disableRule(id, deleteFile);
+        break;
+
+      case 'delete':
+        deleteRule(id, deleteFile);
+        break;
     }
   }
 

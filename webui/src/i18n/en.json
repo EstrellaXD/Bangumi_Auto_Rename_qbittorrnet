@@ -1,162 +1,176 @@
 {
-  "login": {
-    "title": "Login",
-    "username": "Username",
-    "password": "Password",
-    "login_btn": "Login",
-    "default": "Default"
-  },
-  "sidebar": {
-    "title": "Menu",
-    "homepage": "HomePage",
-    "player": "Player",
-    "log": "Log",
-    "config": "Config",
-    "logout": "Logout",
-    "downloader": "Downloader",
-    "calendar": "Calendar",
-    "rss": "RSS Manager"
-  },
-  "topbar": {
-    "start": "Start",
-    "pause": "Pause",
-    "restart": "Restart",
-    "shutdown": "Shutdown",
-    "reset_rule": "Reset Rule",
-    "refresh_poster": "Refresh Poster",
-    "search": {
-      "placeholder": "Type to search"
-    },
-    "profile": {
-      "title": "Profile",
-      "pop_title": "Change Account",
-      "username": "Username",
-      "password": "Password",
-      "update_btn": "Update"
-    },
-    "add": {
-      "title": "Add RSS",
-      "rss_link": "RSS Link",
-      "name": "Name",
-      "aggregate": "Aggregate RSS",
-      "parser": "Parser",
-      "placeholder_link": "Please enter the RSS link",
-      "placeholder_name": "Optional",
-      "button": "Add"
-    }
-  },
-  "homepage": {
-    "rule": {
-      "official_title": "Official Title",
-      "year": "Year",
-      "season": "Season",
-      "offset": "Offset",
-      "exclude": "Exclude",
-      "enable": "Enable",
-      "disable": "Disable",
-      "delete": "Delete",
-      "apply": "Apply",
-      "yes_btn": "Yes",
-      "no_btn": "No",
-      "enable_hit": "Do you want to enable this rule?",
-      "delete_hit": "Delete Local File?",
-      "enable_rule": "Enable Rule",
-      "edit_rule": "Edit Rule"
-    }
-  },
-  "rss": {
-    "title": "RSS Item",
-    "selectbox": "Select",
-    "name": "Name",
-    "url": "Url",
-    "status": "Status",
-    "delete": "Delete",
-    "disable": "Disable",
-    "enable": "Enable"
-  },
-  "player": {
-    "hit": "Please set up the media player"
-  },
-  "downloader": {
-    "hit": "Please set up the downloader"
-  },
-  "log": {
-    "title": "Log",
-    "reset": "Reset",
-    "copy": "Copy",
-    "contact_info": "Contact Infomation",
-    "go": "Go",
-    "join": "Join",
-    "bug_repo": "Bug Report"
-  },
   "config": {
-    "normal_set": {
-      "title": "Normal Setting",
-      "rss_interval": "Interval Time of Rss",
-      "rename_interval": "Interval Time of Rename",
-      "web_port": "WebUI Port",
-      "debug": "Debug"
-    },
-    "parser_set": {
-      "title": "Parser Setting",
-      "enable": "Enable",
-      "source": "Source",
-      "token": "Token",
-      "url": "Custom Url",
-      "language": "Language",
-      "type": "Parser Type",
-      "exclude": "Exclude"
-    },
+    "apply": "Apply",
+    "cancel": "Cancel",
     "downloader_set": {
-      "title": "Downloader Setting",
-      "type": "Downloader Type",
       "host": "Host",
-      "username": "Username",
       "password": "Password",
       "path": "Download Path",
-      "ssl": "SSL"
-    },
-    "manage_set": {
-      "title": "Manage Setting",
-      "enable": "Enable",
-      "method": "Rename Method",
-      "eps": "EPS complete",
-      "group_tag": "Add Group Tag",
-      "delete_bad_torrent": "Delete Bad Torrent"
-    },
-    "notification_set": {
-      "title": "Notification Setting",
-      "enable": "Enable",
-      "type": "Type",
-      "token": "Token",
-      "chat_id": "Chat ID"
-    },
-    "proxy_set": {
-      "title": "Proxy Setting",
-      "enable": "Enable",
-      "type": "Proxy Type",
-      "host": "Host",
-      "port": "Port",
-      "username": "Username",
-      "password": "Password"
+      "ssl": "SSL",
+      "title": "Downloader Setting",
+      "type": "Downloader Type",
+      "username": "Username"
     },
     "experimental_openai_set": {
-      "title": "Experimental Setting",
-      "warning": "Warning: Experimental feature is not yet stable. Please use with caution.",
-      "enable": "Enable OpenAI",
-      "api_key": "OpenAI API Key",
       "api_base": "OpenAI API Base URL (Azure entrypoint)",
-      "model": "OpenAI Model",
+      "api_key": "OpenAI API Key",
       "api_type": "OpenAI API Type",
       "api_version": "Azure OpenAI Version",
-      "deployment_id": "Azure OpenAI Deployment ID"
+      "deployment_id": "Azure OpenAI Deployment ID",
+      "enable": "Enable OpenAI",
+      "model": "OpenAI Model",
+      "title": "Experimental Setting",
+      "warning": "Warning: Experimental feature is not yet stable. Please use with caution."
+    },
+    "manage_set": {
+      "delete_bad_torrent": "Delete Bad Torrent",
+      "enable": "Enable",
+      "eps": "EPS complete",
+      "group_tag": "Add Group Tag",
+      "method": "Rename Method",
+      "title": "Manage Setting"
     },
     "media_player_set": {
       "title": "Media Player Setting",
       "type": "type",
       "url": "url"
     },
-    "cancel": "Cancel",
-    "apply": "Apply"
+    "normal_set": {
+      "debug": "Debug",
+      "rename_interval": "Interval Time of Rename",
+      "rss_interval": "Interval Time of Rss",
+      "title": "Normal Setting",
+      "web_port": "WebUI Port"
+    },
+    "notification_set": {
+      "chat_id": "Chat ID",
+      "enable": "Enable",
+      "title": "Notification Setting",
+      "token": "Token",
+      "type": "Type"
+    },
+    "parser_set": {
+      "enable": "Enable",
+      "exclude": "Exclude",
+      "language": "Language",
+      "source": "Source",
+      "title": "Parser Setting",
+      "token": "Token",
+      "type": "Parser Type",
+      "url": "Custom Url"
+    },
+    "proxy_set": {
+      "enable": "Enable",
+      "host": "Host",
+      "password": "Password",
+      "port": "Port",
+      "title": "Proxy Setting",
+      "type": "Proxy Type",
+      "username": "Username"
+    }
+  },
+  "downloader": {
+    "hit": "Please set up the downloader"
+  },
+  "homepage": {
+    "rule": {
+      "apply": "Apply",
+      "delete": "Delete",
+      "delete_hit": "Delete Local File?",
+      "disable": "Disable",
+      "edit_rule": "Edit Rule",
+      "enable": "Enable",
+      "enable_hit": "Do you want to enable this rule?",
+      "enable_rule": "Enable Rule",
+      "exclude": "Exclude",
+      "no_btn": "No",
+      "official_title": "Official Title",
+      "offset": "Offset",
+      "season": "Season",
+      "year": "Year",
+      "yes_btn": "Yes"
+    }
+  },
+  "log": {
+    "bug_repo": "Bug Report",
+    "contact_info": "Contact Infomation",
+    "copy": "Copy",
+    "go": "Go",
+    "join": "Join",
+    "reset": "Reset",
+    "title": "Log",
+    "update_now": "Update Now"
+  },
+  "login": {
+    "login_btn": "Login",
+    "password": "Password",
+    "title": "Login",
+    "username": "Username"
+  },
+  "notify": {
+    "copy_failed": "Your browser does not support Clipboard API!",
+    "copy_success": "Copy Success!",
+    "login_failed": "Login Failed!",
+    "login_success": "Login Success!",
+    "password_length_error": "Password must be at least 8 characters long!",
+    "please_enter": "Please Enter {0}!",
+    "please_update": "Please Update AutoBangumi!",
+    "rss_link": "RSS Link",
+    "update_failed": "Update Failed!",
+    "update_success": "Update Success!"
+  },
+  "player": {
+    "hit": "Please set up the media player"
+  },
+  "rss": {
+    "delete": "Delete",
+    "disable": "Disable",
+    "enable": "Enable",
+    "name": "Name",
+    "selectbox": "Select",
+    "status": "Status",
+    "title": "RSS Item",
+    "url": "Url"
+  },
+  "sidebar": {
+    "calendar": "Calendar",
+    "config": "Config",
+    "downloader": "Downloader",
+    "homepage": "HomePage",
+    "log": "Log",
+    "logout": "Logout",
+    "player": "Player",
+    "rss": "RSS Manager",
+    "title": "Menu"
+  },
+  "topbar": {
+    "add": {
+      "aggregate": "Aggregate RSS",
+      "button": "Add",
+      "collect": "Collect",
+      "name": "Name",
+      "parser": "Parser",
+      "placeholder_link": "Please enter the RSS link",
+      "placeholder_name": "Optional",
+      "rss_link": "RSS Link",
+      "subscribe": "Subscribe",
+      "title": "Add RSS"
+    },
+    "pause": "Pause",
+    "profile": {
+      "password": "Password",
+      "pop_title": "Change Account",
+      "title": "Profile",
+      "update_btn": "Update",
+      "username": "Username"
+    },
+    "refresh_poster": "Refresh Poster",
+    "reset_rule": "Reset Rule",
+    "restart": "Restart",
+    "search": {
+      "placeholder": "Type to search"
+    },
+    "shutdown": "Shutdown",
+    "start": "Start"
   }
 }

@@ -1,71 +1,98 @@
+import asyncio
 import logging
+from abc import abstractmethod
 
 from module.conf import settings
 from module.models import Bangumi
 from module.models.bangumi import Episode
-from module.parser.analyser import (
-    OpenAIParser,
-    mikan_parser,
-    raw_parser,
-    tmdb_parser,
-    torrent_parser,
-)
+from module.parser import analyser
 
 logger = logging.getLogger(__name__)
 
 
-class TitleParser:
-    def __init__(self):
+class RawParser:
+
+    @staticmethod
+    @abstractmethod
+    def parser(title: str, **kwargs) -> Bangumi:
         pass
 
-    @staticmethod
-    def torrent_parser(
-        torrent_path: str,
-        torrent_name: str | None = None,
-        season: int | None = None,
-        file_type: str = "media",
-    ):
-        try:
-            return torrent_parser(torrent_path, torrent_name, season, file_type)
-        except Exception as e:
-            logger.warning(f"Cannot parse {torrent_path} with error {e}")
+
+class TmdbParser(RawParser):
 
     @staticmethod
-    def tmdb_parser(title: str, season: int, language: str):
-        tmdb_info = tmdb_parser(title, language)
+    async def parser(title: str, season: int = 1, language: str = "zh"):
+        tmdb_info = await analyser.tmdb_parser(title, language)
         if tmdb_info:
-            logger.debug(f"TMDB Matched, official title is {tmdb_info.title}")
+            logger.debug(
+                f"[Title Parser] TMDB Matched, official title is {tmdb_info.title}"
+            )
             tmdb_season = tmdb_info.last_season if tmdb_info.last_season else season
-            return tmdb_info.title, tmdb_season, tmdb_info.year, tmdb_info.poster_link
+            # return tmdb_info.title, tmdb_season, tmdb_info.year, tmdb_info.poster_link
+            return Bangumi(
+                official_title=tmdb_info.title,
+                title_raw=title,
+                year=tmdb_info.year,
+                season=tmdb_season,
+                poster_link=tmdb_info.poster_link,
+            )
+
         else:
-            logger.warning(f"Cannot match {title} in TMDB. Use raw title instead.")
-            logger.warning("Please change bangumi info manually.")
-            return title, season, None, None
+            logger.warning(
+                f"[Title Parser]Cannot match {title} in TMDB. Use raw title instead."
+            )
+            logger.warning("[Title Parser]Please change bangumi info manually.")
+
+            return Bangumi(
+                official_title=title,
+                title_raw=title,
+                season=season,
+            )
 
     @staticmethod
-    def tmdb_poster_parser(bangumi: Bangumi):
-        tmdb_info = tmdb_parser(bangumi.official_title, settings.rss_parser.language)
+    async def poster_parser(bangumi: Bangumi):
+        tmdb_info = await analyser.tmdb_parser(
+            bangumi.official_title, settings.rss_parser.language
+        )
         if tmdb_info:
-            logger.debug(f"TMDB Matched, official title is {tmdb_info.title}")
+            logger.debug(
+                f"[Title Parser] TMDB Matched, official title is {tmdb_info.title}"
+            )
             bangumi.poster_link = tmdb_info.poster_link
         else:
             logger.warning(
-                f"Cannot match {bangumi.official_title} in TMDB. Use raw title instead."
+                f"[Title Parser] Cannot match {bangumi.official_title} in TMDB. Use raw title instead."
             )
-            logger.warning("Please change bangumi info manually.")
+            logger.warning("[Title Parser] Please change bangumi info manually.")
 
+
+class MikanParser(RawParser):
     @staticmethod
-    def raw_parser(raw: str) -> Bangumi | None:
+    async def parser(homepage: str) -> tuple[str, str]:
+
+        mikan_parser = analyser.MikanParser(homepage)
+        tasks = [mikan_parser.parser(), mikan_parser.poster_parser()]
+        official_title, poster_link = await asyncio.gather(*tasks)
+
+        return Bangumi(
+            official_title=official_title,
+            poster_link=poster_link,
+        )
+
+
+class RawParser(RawParser):
+    @staticmethod
+    def parser(raw: str) -> Bangumi | None:
         language = settings.rss_parser.language
         try:
             # use OpenAI ChatGPT to parse raw title and get structured data
-            if settings.experimental_openai.enable:
-                kwargs = settings.experimental_openai.dict(exclude={"enable"})
-                gpt = OpenAIParser(**kwargs)
-                episode_dict = gpt.parse(raw, asdict=True)
-                episode = Episode(**episode_dict)
-            else:
-                episode = raw_parser(raw)
+            # if settings.experimental_openai.enable:
+            #     kwargs = settings.experimental_openai.dict(exclude={"enable"})
+            #     gpt = analyser.OpenAIParser(**kwargs)
+            #     episode_dict = gpt.parse(raw, asdict=True)
+            #     episode = Episode(**episode_dict)
+            # else:
+            episode: Episode = analyser.RawParser(raw).parser()
 
             titles = {
                 "zh": episode.title_zh,
@@ -88,6 +115,7 @@ class TitleParser:
             return Bangumi(
                 official_title=official_title,
                 title_raw=title_raw,
+                year=None,
                 season=_season,
                 season_raw=episode.season_raw,
                 group_name=episode.group,
@@ -103,6 +131,42 @@ class TitleParser:
             logger.warning(f"Cannot parse {raw}.")
             return None
 
+
+class TitleParser:
+    def __init__(self):
+        pass
+
     @staticmethod
-    def mikan_parser(homepage: str) -> tuple[str, str]:
-        return mikan_parser(homepage)
+    def torrent_parser(
+        torrent_path: str,
+        torrent_name: str,
+        season: int | None = None,
+        file_type: str = "media",
+    ):
+        try:
+            return analyser.torrent_parser(
+                torrent_path,
+                torrent_name,
+                file_type,
+                season,
+            )
+        except Exception as e:
+            logger.warning(f"Cannot parse {torrent_path} with error {e}")
+
+
+if __name__ == "__main__":
+    import asyncio
+
+    async def test(title):
+        tb = RawParser().parser(title)
+        return RawParser.parser(tb.title_raw)
+
+    # parser = TmdbParser()
+
+    title = "/Volumes/gtx/download/qb/动漫/物语系列/Season 5"
+    language = "zh"
+    season = 1
+    official_title = "败犬女主太多了！"
+
+    ans = asyncio.run(test(title))
+    print(ans)

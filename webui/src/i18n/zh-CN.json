@@ -1,162 +1,176 @@
 {
-  "login": {
-    "title": "登录",
-    "username": "用户名",
-    "password": "密码",
-    "login_btn": "登录",
-    "default": "默认账号密码"
-  },
-  "sidebar": {
-    "title": "菜单",
-    "homepage": "主页",
-    "player": "播放器",
-    "log": "日志",
-    "config": "设置",
-    "logout": "退出",
-    "calendar": "番剧日历",
-    "downloader": "下载器",
-    "rss": "RSS 管理"
-  },
-  "topbar": {
-    "start": "启动",
-    "pause": "暂停",
-    "restart": "重启",
-    "shutdown": "关闭",
-    "reset_rule": "重置规则",
-    "refresh_poster": "刷新海报",
-    "search": {
-      "placeholder": "输入关键字搜索"
-    },
-    "profile": {
-      "title": "账户设置",
-      "pop_title": "修改账户",
-      "username": "用户名",
-      "password": "密码",
-      "update_btn": "更新"
-    },
-    "add": {
-      "title": "添加 RSS",
-      "rss_link": "RSS 链接",
-      "name": "名称",
-      "aggregate": "聚合 RSS",
-      "parser": "解析器",
-      "placeholder_link": "请输入 RSS 链接",
-      "placeholder_name": "可选",
-      "button": "添加"
-    }
-  },
-  "homepage": {
-    "rule": {
-      "official_title": "官方名称",
-      "year": "年份",
-      "season": "季度",
-      "offset": "剧集偏移",
-      "exclude": "排除",
-      "enable": "启用",
-      "disable": "禁用",
-      "delete": "删除",
-      "apply": "应用",
-      "yes_btn": "是",
-      "no_btn": "否",
-      "enable_hit": "确定启用该规则？",
-      "delete_hit": "是否删除本地文件？",
-      "enable_rule": "启用规则",
-      "edit_rule": "编辑规则"
-    }
-  },
-  "rss": {
-    "title": "RSS 条目",
-    "selectbox": "选择",
-    "name": "名称",
-    "url": "Url",
-    "status": "状态",
-    "delete": "删除",
-    "disable": "禁用",
-    "enable": "启用"
-  },
-  "player": {
-    "hit": "请设置媒体播放器地址"
-  },
-  "downloader": {
-    "hit": "请设置下载器"
-  },
-  "log": {
-    "title": "日志",
-    "reset": "重置",
-    "copy": "复制",
-    "contact_info": "联系方式",
-    "go": "访问",
-    "join": "加入",
-    "bug_repo": "Bug 反馈"
-  },
   "config": {
-    "normal_set": {
-      "title": "常规设置",
-      "rss_interval": "RSS 间隔",
-      "rename_interval": "重命名间隔",
-      "web_port": "网页端口",
-      "debug": "调试"
-    },
-    "parser_set": {
-      "title": "解析设置",
-      "enable": "启用",
-      "source": "数据源",
-      "token": "Token",
-      "url": "自定义网址",
-      "language": "语言",
-      "type": "解析类型",
-      "exclude": "排除"
-    },
+    "apply": "应用",
+    "cancel": "取消",
     "downloader_set": {
-      "title": "下载设置",
-      "type": "下载器类型",
       "host": "下载器地址",
-      "username": "用户名",
       "password": "密码",
       "path": "下载地址",
-      "ssl": "SSL"
-    },
-    "manage_set": {
-      "title": "番剧管理设置",
-      "enable": "启用",
-      "method": "重命名方式",
-      "eps": "番剧补全",
-      "group_tag": "添加组标签",
-      "delete_bad_torrent": "删除坏种"
-    },
-    "notification_set": {
-      "title": "通知设置",
-      "enable": "启用",
-      "type": "类型",
-      "token": "Token",
-      "chat_id": "Chat ID"
-    },
-    "proxy_set": {
-      "title": "代理设置",
-      "enable": "启用",
-      "type": "类型",
-      "host": "地址",
-      "port": "端口",
-      "username": "用户名",
-      "password": "密码"
+      "ssl": "SSL",
+      "title": "下载设置",
+      "type": "下载器类型",
+      "username": "用户名"
     },
     "experimental_openai_set": {
-      "title": "实验功能设置",
-      "warning": "警告：实验功能尚未稳定，请谨慎使用",
-      "enable": "启用 OpenAI",
-      "api_key": "OpenAI API Key",
       "api_base": "OpenAI API Base URL (Azure entrypoint)",
-      "model": "OpenAI 模型",
+      "api_key": "OpenAI API Key",
       "api_type": "OpenAI API 类型",
       "api_version": "Azure OpenAI 版本",
-      "deployment_id": "Azure OpenAI Deployment ID"
+      "deployment_id": "Azure OpenAI Deployment ID",
+      "enable": "启用 OpenAI",
+      "model": "OpenAI 模型",
+      "title": "实验功能设置",
+      "warning": "警告：实验功能尚未稳定，请谨慎使用"
+    },
+    "manage_set": {
+      "delete_bad_torrent": "删除坏种",
+      "enable": "启用",
+      "eps": "番剧补全",
+      "group_tag": "添加组标签",
+      "method": "重命名方式",
+      "title": "番剧管理设置"
     },
     "media_player_set": {
       "title": "播放器设置",
       "type": "类型",
       "url": "播放器地址"
     },
-    "cancel": "取消",
-    "apply": "应用"
+    "normal_set": {
+      "debug": "调试",
+      "rename_interval": "重命名间隔",
+      "rss_interval": "RSS 间隔",
+      "title": "常规设置",
+      "web_port": "网页端口"
+    },
+    "notification_set": {
+      "chat_id": "Chat ID",
+      "enable": "启用",
+      "title": "通知设置",
+      "token": "Token",
+      "type": "类型"
+    },
+    "parser_set": {
+      "enable": "启用",
+      "exclude": "排除",
+      "language": "语言",
+      "source": "数据源",
+      "title": "解析设置",
+      "token": "Token",
+      "type": "解析类型",
+      "url": "自定义网址"
+    },
+    "proxy_set": {
+      "enable": "启用",
+      "host": "地址",
+      "password": "密码",
+      "port": "端口",
+      "title": "代理设置",
+      "type": "类型",
+      "username": "用户名"
+    }
+  },
+  "downloader": {
+    "hit": "请设置下载器"
+  },
+  "homepage": {
+    "rule": {
+      "apply": "应用",
+      "delete": "删除",
+      "delete_hit": "是否删除本地文件？",
+      "disable": "禁用",
+      "edit_rule": "编辑规则",
+      "enable": "启用",
+      "enable_hit": "确定启用该规则？",
+      "enable_rule": "启用规则",
+      "exclude": "排除",
+      "no_btn": "否",
+      "official_title": "官方名称",
+      "offset": "剧集偏移",
+      "season": "季度",
+      "year": "年份",
+      "yes_btn": "是"
+    }
+  },
+  "log": {
+    "bug_repo": "Bug 反馈",
+    "contact_info": "联系方式",
+    "copy": "复制",
+    "go": "访问",
+    "join": "加入",
+    "reset": "重置",
+    "title": "日志",
+    "update_now": "立即更新"
+  },
+  "login": {
+    "login_btn": "登录",
+    "password": "密码",
+    "title": "登录",
+    "username": "用户名"
+  },
+  "notify": {
+    "copy_failed": "您的浏览器不支持剪贴板操作!",
+    "copy_success": "复制成功!",
+    "login_failed": "登录失败!",
+    "login_success": "登录成功!",
+    "password_length_error": "密码长度必须至少为8个字符!",
+    "please_enter": "请输入{0}!",
+    "please_update": "请更新AutoBangumi!",
+    "rss_link": "RSS链接",
+    "update_failed": "更新失败!",
+    "update_success": "更新成功!"
+  },
+  "player": {
+    "hit": "请设置媒体播放器地址"
+  },
+  "rss": {
+    "delete": "删除",
+    "disable": "禁用",
+    "enable": "启用",
+    "name": "名称",
+    "selectbox": "选择",
+    "status": "状态",
+    "title": "RSS 条目",
+    "url": "链接"
+  },
+  "sidebar": {
+    "calendar": "番剧日历",
+    "config": "设置",
+    "downloader": "下载器",
+    "homepage": "主页",
+    "log": "日志",
+    "logout": "退出",
+    "player": "播放器",
+    "rss": "RSS 管理",
+    "title": "菜单"
+  },
+  "topbar": {
+    "add": {
+      "aggregate": "聚合 RSS",
+      "button": "添加",
+      "collect": "收集",
+      "name": "名称",
+      "parser": "解析器",
+      "placeholder_link": "请输入 RSS 链接",
+      "placeholder_name": "可选",
+      "rss_link": "RSS 链接",
+      "subscribe": "订阅",
+      "title": "添加 RSS"
+    },
+    "pause": "暂停",
+    "profile": {
+      "password": "密码",
+      "pop_title": "修改账户",
+      "title": "账户设置",
+      "update_btn": "更新",
+      "username": "用户名"
+    },
+    "refresh_poster": "刷新海报",
+    "reset_rule": "重置规则",
+    "restart": "重启",
+    "search": {
+      "placeholder": "输入关键字搜索"
+    },
+    "shutdown": "关闭",
+    "start": "启动"
   }
 }

@@ -10,9 +10,9 @@ const { user, update } = useAuth();
   <ab-popup
     v-model:show="show"
     :title="$t('topbar.profile.pop_title')"
-    css="w-365px"
+    css="w-365"
   >
-    <div space-y-16px>
+    <div space-y-16>
       <ab-label :label="$t('topbar.profile.username')">
         <input
           v-model="user.username"

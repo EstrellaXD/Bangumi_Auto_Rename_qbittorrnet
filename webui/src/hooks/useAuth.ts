@@ -1,29 +1,40 @@
 import type { User } from '#/auth';
 import type { ApiError } from '#/api';
+import { router } from '@/router';
 
 export const useAuth = createSharedComposable(() => {
-  const isLoggedin = useLocalStorage('isLoggedin', false);
   const message = useMessage();
+  const { t } = useMyI18n();
+
+  const isLoggedIn = useLocalStorage('isLoggedIn', false);
+
+  watch(isLoggedIn, (v) => {
+    if (v) {
+      router.replace({ name: 'Index' });
+    } else {
+      router.replace({ name: 'Login' });
+    }
+  });
 
   const user = reactive<User>({
     username: '',
     password: '',
   });
 
-
   function clearUser() {
     user.username = '';
     user.password = '';
   }
 
-  function check() {
+  function formVerify() {
     if (user.username === '') {
-      message.warning('Please Enter Username!');
+      message.warning(t('notify.please_enter', [t('topbar.profile.username')]));
       return false;
-    }
-
-    if (user.password === '') {
-      message.warning('Please Enter Password!');
+    } else if (user.password === '') {
+      message.warning(t('notify.please_enter', [t('topbar.profile.password')]));
+      return false;
+    } else if (user.password.length < 8) {
+      message.error(t('notify.password_length_error'));
       return false;
     }
 
@@ -31,81 +42,53 @@ export const useAuth = createSharedComposable(() => {
   }
 
   function login() {
-    const { execute, onResult, onError } = useApi(apiAuth.login, {
-      message: {
-        success: 'Login Success!',
-      },
-    });
+    if (!formVerify()) return;
 
-    onResult((res) => {
-      isLoggedin.value = true;
-      clearUser();
-    });
-
-    onError((err) => {
-      const error = err as ApiError;
-
-      if (error.status === 404) {
-        message.error('请更新AutoBangumi!');
-      } else if (error.status === 401) {
-        message.error(err.msg_zh);
-      }
-    });
-
-    if (check()) {
-      execute(user.username, user.password);
-    }
+    apiAuth
+      .login(user.username, user.password)
+      .then(() => {
+        isLoggedIn.value = true;
+        clearUser();
+        message.success(t('notify.login_success'));
+      })
+      .catch((err: ApiError) => {
+        if (err.status === 404) {
+          message.error(t('notify.please_update'));
+        }
+      });
   }
 
-  const { execute: logout, onResult: onLogoutResult } = useApi(apiAuth.logout, {
-    failRule: (res) => !res,
-    message: {
-      success: 'Logout Success!',
-      fail: 'Logout Failed!',
+  const { execute: logout } = useApi(apiAuth.logout, {
+    showMessage: true,
+    onSuccess() {
+      clearUser();
+      isLoggedIn.value = false;
     },
   });
 
-  onLogoutResult(() => {
-    clearUser();
-    isLoggedin.value = false;
-  });
-
-  const { execute: refresh, onResult: onRefreshResult } = useApi(
-    apiAuth.refresh
-  );
-
-  onRefreshResult((res) => {
-    isLoggedin.value = true;
+  const { execute: refresh } = useApi(apiAuth.refresh, {
+    showMessage: false,
+    onSuccess() {
+      isLoggedIn.value = true;
+    },
   });
 
   function update() {
-    const { execute, onResult } = useApi(apiAuth.update, {
-      failRule: (res) => res.message !== 'update success',
-      message: {
-        success: 'Update Success!',
-        fail: 'Update Failed!',
-      },
-    });
+    if (!formVerify()) return;
 
-    onResult((res) => {
-      if (res.message === 'update success') {
+    apiAuth.update(user.username, user.password).then((res) => {
+      if (res.message.toLocaleLowerCase() === 'update success') {
         clearUser();
+        message.success(t('notify.update_success'));
       } else {
         user.password = '';
+        message.error(t('notify.update_failed'));
       }
     });
-
-    if (check()) {
-      if (user.password.length < 8) {
-        message.error('Password must be at least 8 characters long!');
-      } else {
-        execute(user.username, user.password);
-      }
-    }
   }
 
   return {
-    isLoggedin,
+    isLoggedIn,
     user,
 
     login,

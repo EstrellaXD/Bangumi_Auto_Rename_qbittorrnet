@@ -1,3 +1,17 @@
+$min-pc: 1024px;
+
+@mixin forMobile {
+  @media screen and (max-width: ($min-pc - 1)) {
+    @content;
+  }
+}
+
+@mixin forPC {
+  @media screen and (min-width: $min-pc) {
+    @content;
+  }
+}
+
 @mixin bg-mouse-event($normal, $hover, $active) {
   background: $normal;
   transition: background 0.3s;

@@ -1,4 +1,3 @@
-from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 
 from module.models.response import ResponseModel

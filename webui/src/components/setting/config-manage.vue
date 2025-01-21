@@ -43,7 +43,7 @@ const items: SettingItem<BangumiManage>[] = [
 
 <template>
   <ab-fold-panel :title="$t('config.manage_set.title')">
-    <div space-y-12px>
+    <div space-y-12>
       <ab-setting
         v-for="i in items"
         :key="i.configKey"

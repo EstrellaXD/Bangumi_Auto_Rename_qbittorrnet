@@ -1,3 +1,4 @@
+import { omit } from 'radash';
 import type { BangumiAPI, BangumiRule } from '#/bangumi';
 import type { ApiSuccess } from '#/api';
 

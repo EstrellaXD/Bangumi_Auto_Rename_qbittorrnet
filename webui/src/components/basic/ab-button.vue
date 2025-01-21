@@ -21,11 +21,11 @@ defineEmits(['click']);
 const buttonSize = computed(() => {
   switch (props.size) {
     case 'big':
-      return 'rounded-10px text-h1 w-276px h-55px text-h1';
+      return 'rounded-10 text-h1 w-276 h-55 text-h1';
     case 'normal':
-      return 'rounded-6px w-170px h-36px';
+      return 'rounded-6 w-170 h-36';
     case 'small':
-      return 'rounded-6px w-86px h-28px text-main';
+      return 'rounded-6 w-86 h-28 text-main';
   }
 });
 

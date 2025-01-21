@@ -1,19 +1,16 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
 import { vOnClickOutside } from '@vueuse/components';
+import type { BangumiRule } from '#/bangumi';
 
-defineEmits(['add-bangumi']);
+defineEmits<{
+  (e: 'add-bangumi', bangumiRule: BangumiRule): void;
+}>();
+
 const showProvider = ref(false);
-const {
-  providers,
-  getProviders,
-  provider,
-  loading,
-  onSearch,
-  clearSearch,
-  inputValue,
-  bangumiList,
-} = useSearchStore();
+const { providers, provider, loading, inputValue, bangumiList } = storeToRefs(
+  useSearchStore()
+);
+const { getProviders, onSearch, clearSearch } = useSearchStore();
 
 onMounted(() => {
   getProviders();
@@ -38,10 +35,10 @@ function onSelect(site: string) {
     v-show="showProvider"
     v-on-click-outside="() => (showProvider = false)"
     abs
-    top-84px
-    left-540px
-    w-100px
-    rounded-12px
+    top-84
+    left-540
+    w-100
+    rounded-12
     shadow
     bg-white
     z-99
@@ -54,14 +51,14 @@ function onSelect(site: string) {
       is-btn
       @click="() => onSelect(site)"
     >
-      <div text-h3 text-primary hover:text-white p-12px truncate>
+      <div text="h3 primary" hover="text-white" p-12 truncate>
         {{ site }}
       </div>
     </div>
   </div>
 
-  <div v-on-click-outside="clearSearch" abs top-84px left-192px z-8>
-    <transition-group name="fade-list" tag="ul" space-y-12px>
+  <div v-on-click-outside="clearSearch" abs top-84 left-192 z-8>
+    <transition-group name="fade-list" tag="ul" space-y-12>
       <li v-for="bangumi in bangumiList" :key="bangumi.order">
         <ab-bangumi-card
           :bangumi="bangumi.value"

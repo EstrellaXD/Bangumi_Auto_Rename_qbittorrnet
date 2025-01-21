@@ -1,6 +1,6 @@
 from module.database.combine import Database
 from module.models import Bangumi, RSSItem, Torrent
-from sqlmodel import SQLModel, create_engine
+from sqlmodel import create_engine
 from sqlmodel.pool import StaticPool
 
 # sqlite mock engine
@@ -42,7 +42,10 @@ def test_bangumi_database():
         assert db.bangumi.search_id(1) == test_data
 
         # search poster
-        assert db.bangumi.match_poster("无职转生，到了异世界就拿出真本事II (2021)") == "/test/test.jpg"
+        assert (
+            db.bangumi.match_poster("无职转生，到了异世界就拿出真本事II (2021)")
+            == "/test/test.jpg"
+        )
 
         # match torrent
         result = db.bangumi.match_torrent(

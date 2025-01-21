@@ -13,7 +13,7 @@ const items: SettingItem<Downloader>[] = [
     configKey: 'type',
     label: () => t('config.downloader_set.type'),
     type: 'select',
-    css: 'w-115px',
+    css: 'w-115',
     prop: {
       items: downloaderType,
     },
@@ -65,7 +65,7 @@ const items: SettingItem<Downloader>[] = [
 
 <template>
   <ab-fold-panel :title="$t('config.downloader_set.title')">
-    <div space-y-12px>
+    <div space-y-12>
       <ab-setting
         v-for="i in items"
         :key="i.configKey"

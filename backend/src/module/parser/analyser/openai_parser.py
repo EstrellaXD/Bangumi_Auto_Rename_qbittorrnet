@@ -1,10 +1,9 @@
 import json
 import logging
-from concurrent.futures import ThreadPoolExecutor
 from typing import Any
-
-import openai
-
+from module.conf import settings
+# from openai import AsyncOpenAI
+# TODO: 再说吧TVT
 logger = logging.getLogger(__name__)
 
 DEFAULT_PROMPT = """\
@@ -18,9 +17,9 @@ the python structured data type is:
 ```python
 @dataclass
 class Episode:
-    title_en: Optional[str]
-    title_zh: Optional[str]
-    title_jp: Optional[str]
+    title_en: str|None
+    title_zh: str|None
+    title_jp: str|None
     season: int
     season_raw: str
     episode: int
@@ -45,12 +44,12 @@ output: '{"group": "Lilith-Raws", "title_en": "Otonari no Tenshi-sama", "resolut
 """
 
 
+# api_key: str,
+# api_base: str = "https://api.openai.com/v1",
+# model: str = "gpt-3.5-turbo",
 class OpenAIParser:
     def __init__(
         self,
-        api_key: str,
-        api_base: str = "https://api.openai.com/v1",
-        model: str = "gpt-3.5-turbo",
         **kwargs,
     ) -> None:
         """OpenAIParser is a class to parse text with openai
@@ -71,15 +70,15 @@ class OpenAIParser:
         Raises:
             ValueError: if api_key is not provided.
         """
-        if not api_key:
+        if not settings.experimental_openai.api_key:
             raise ValueError("API key is required.")
 
-        self._api_key = api_key
-        self.api_base = api_base
-        self.model = model
+        self._api_key = settings.experimental_openai.api_key
+        self.api_base = settings.experimental_openai.api_base
+        self.model = settings.experimental_openai.model
         self.openai_kwargs = kwargs
 
-    def parse(
+    async def parse(
         self, text: str, prompt: str | None = None, asdict: bool = True
     ) -> dict | str:
         """parse text with openai
@@ -100,22 +99,28 @@ class OpenAIParser:
             prompt = DEFAULT_PROMPT
 
         params = self._prepare_params(text, prompt)
+        print(params)
 
-        with ThreadPoolExecutor(max_workers=1) as worker:
-            future = worker.submit(openai.ChatCompletion.create, **params)
-            resp = future.result()
+        # with ThreadPoolExecutor(max_workers=1) as worker:
+        #     future = worker.submit(openai.ChatCompletion.create, **params)
+        #     resp = future.result()
+        #
+        #     result = resp["choices"][0]["message"]["content"]
 
-            result = resp["choices"][0]["message"]["content"]
+        
+        # async with RequestContent() as req:
+        #     json_contents = await req.post_data(url)
+        #     print(json_contents)
+        # if asdict:
+        #     try:
 
-        if asdict:
-            try:
-                result = json.loads(result)
-            except json.JSONDecodeError:
-                logger.warning(f"Cannot parse result {result} as python dict.")
+        #         result = json.loads(result)
+        #     except json.JSONDecodeError:
+        #         logger.warning(f"Cannot parse result {result} as python dict.")
+        #
+        # logger.debug(f"the parsed result is: {result}")
 
-        logger.debug(f"the parsed result is: {result}")
-
-        return result
+        # return result
 
     def _prepare_params(self, text: str, prompt: str) -> dict[str, Any]:
         """_prepare_params is a helper function to prepare params for openai library.
@@ -149,3 +154,13 @@ class OpenAIParser:
             params["model"] = self.model
 
         return params
+
+
+if __name__ == "__main__":
+    import asyncio
+    test = OpenAIParser()
+    asyncio.run(test.parse("2"))
+
+
+    test = OpenAIParser()
+

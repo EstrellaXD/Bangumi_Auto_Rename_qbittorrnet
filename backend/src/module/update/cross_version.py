@@ -2,13 +2,13 @@ import re
 
 from urllib3.util import parse_url
 
+from module.database import Database
 from module.rss import RSSManager
-from module.utils import save_image
-from module.network import RequestContent
+from module.utils import gen_poster_path
 
 
 async def from_30_to_31():
-    async with RSSManager() as db:
+    with Database() as db:
         db.migrate()
         # Update poster link
         bangumis = db.bangumi.search_all()
@@ -29,17 +29,16 @@ async def from_30_to_31():
                 aggregate = True
             else:
                 aggregate = False
-            await db.add_rss(rss_link=rss, aggregate=aggregate)
+
+            engine = RSSManager()
+            await engine.add_rss(rss_link=rss, aggregate=aggregate)
 
 
 async def cache_image():
-    async with RSSManager() as db, RequestContent() as req:
+    with Database() as db:
         bangumis = db.bangumi.search_all()
         for bangumi in bangumis:
             if bangumi.poster_link:
                 # Hash local path
-                img = await req.get_content(bangumi.poster_link)
-                suffix = bangumi.poster_link.split(".")[-1]
-                img_path = save_image(img, suffix)
-                bangumi.poster_link = img_path
+                bangumi.poster_link = gen_poster_path(bangumi.poster_link)
         db.bangumi.update_all(bangumis)

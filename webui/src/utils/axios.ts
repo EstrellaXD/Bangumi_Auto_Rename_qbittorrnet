@@ -1,53 +1,54 @@
 import Axios from 'axios';
-import type { ApiError } from '#/api';
+import type { AxiosError, AxiosResponse } from 'axios';
+import type { ApiSuccess, StatusCode } from '#/api';
 
-export const axios = Axios.create();
-
-// axios.interceptors.request.use((config) => {
-//   const { auth } = useAuth();
-//
-//   // if (auth.value !== '' && config.headers) {
-//   //   config.headers.Authorization = auth.value;
-//   // }
-//
-//   return config;
-// });
-
-// axios.defaults.baseURL = '/api/v1';
-axios.defaults.withCredentials = true;
+export const axios = Axios.create({
+  withCredentials: true,
+});
 
 axios.interceptors.response.use(
-  (res) => {
-    return res;
-  },
-  (err) => {
-    const status = err.response.status as ApiError['status'];
-    const msg_en = (err.response.data.msg_en ?? '') as ApiError['msg_en'];
-    const msg_zh = (err.response.data.msg_zh ?? '') as ApiError['msg_zh'];
+  (res: AxiosResponse) => res,
+  (err: AxiosError<ApiSuccess>) => {
+    const status = err.response?.status as StatusCode;
+    const msg_en = err.response?.data.msg_en ?? '';
+    const msg_zh = err.response?.data.msg_zh ?? '';
+
+    const message = useMessage();
+    const { returnUserLangText } = useMyI18n();
+
+    const errorMsg = returnUserLangText({
+      en: msg_en,
+      'zh-CN': msg_zh,
+    });
+
+    const { isLoggedIn } = useAuth();
+
+    switch (status) {
+      /** token 过期 */
+      case 401:
+        isLoggedIn.value = false;
+        if (errorMsg) message.error(errorMsg);
+        break;
+      /** 执行失败 */
+      case 406:
+        if (errorMsg) message.error(errorMsg);
+        break;
+      case 500:
+        isLoggedIn.value = false;
+        message.error(
+          returnUserLangText({
+            en: 'Server error!',
+            'zh-CN': '服务器错误！',
+          })
+        );
+        break;
+    }
 
     const error = {
       status,
       msg_en,
       msg_zh,
     };
-
-    const message = useMessage();
-
-    /** token 过期 */
-    if (error.status === 401) {
-      const { isLoggedin } = useAuth();
-      isLoggedin.value = false;
-    }
-
-    /** 执行失败 */
-    if (error.status === 406) {
-      message.error(error.msg_zh);
-    }
-
-    if (error.status === 500) {
-      const msg = (err.response.data.msg_en ?? '') as ApiError['msg_en'];
-      message.error(msg);
-    }
 
     return Promise.reject(error);
   }

@@ -1,64 +1,133 @@
 import asyncio
+import logging
+from abc import abstractmethod
 
-from module.downloader import DownloadClient
-from module.manager import Renamer
 from module.conf import settings
+from module.downloader import AsyncDownloadController
+from module.manager import Renamer, eps_complete
 from module.rss import RSSEngine
-from module.database import Database
-from module.models import Bangumi, RSSItem, Torrent
 
-
-
-rss_item_pool = []
-torrent_pool: list[tuple[Bangumi, list[Torrent]]] = []
+logger = logging.getLogger(__name__)
 
 
 class AsyncProgram:
     def __init__(self):
+        self.tasks: list[asyncio.Task[None]] = []
+
+    @abstractmethod
+    async def run(self):
+        pass
+
+    async def stop(self):
+        for task in self.tasks:
+            task.cancel()
+            try:
+                logger.debug(f"[AioCore]{task.get_name()} start cancel")
+                await task
+            except asyncio.CancelledError:
+                logger.info(f"[AioCore]{task.get_name()} has canceled")
+            except Exception as e:
+                logger.debug(f"[AioCore] other Exception {e}")
+
+        # logger.info(f"[AioCore]{self.tasks}")
+        self.tasks.clear()
+
+
+class AsyncRenamer(AsyncProgram):
+    def __init__(self):
+        super().__init__()
         self.renamer = Renamer()
-        self.engine = RSSEngine()
-        self.event = asyncio.Event()
 
     async def run(self):
-        self.event.clear()
-        task = []
-        if settings.bangumi_manage.enable:
-            task.append(self.rename_task())
-        if settings.rss_parser.enable:
-            task.append(self.rss_task())
-        await asyncio.gather(*task)
+        await self.stop()
+        task = asyncio.create_task(
+            self.rename_task_loop(),
+            name="renamer_loop",
+        )
+        self.tasks.append(task)
 
     async def rename_task(self):
-        while not self.event.is_set():
-            async with DownloadClient() as client:
-                await self.check_downloader(client)
-                await self.renamer.rename(client)
-                await asyncio.sleep(settings.program.rename_time)
+        try:
+            renamer = Renamer()
+            await renamer.rename()
+        except TimeoutError:
+            logging.error("[Renamer Task] can not connect to downloader")
+
+    async def rename_task_loop(self):
+        while True:
+            task = asyncio.create_task(self.rename_task())
+            self.tasks.append(task)
+            await asyncio.sleep(settings.program.rename_time)
+            self.tasks.remove(task)
+
+
+class AsyncRSS(AsyncProgram):
+    def __init__(self) -> None:
+        super().__init__()
+        self.engine = RSSEngine()
+
+    async def run(self):
+        await self.stop()
+        task = asyncio.create_task(
+            self.rss_task_loop(),
+            name="rss_loop",
+        )
+        self.tasks.append(task)
 
     async def rss_task(self):
-        while not self.event.is_set():
-            await self.engine.rss_poller(process_rss)
+        await self.engine.refresh_all()
+        if settings.bangumi_manage.eps_complete:
+            await eps_complete()
+
+    async def rss_task_loop(self):
+        while True:
+            task = asyncio.create_task(self.rss_task())
+            self.tasks.append(task)
             await asyncio.sleep(settings.program.rss_time)
+            self.tasks.remove(task)
 
 
-async def rename_task():
-    connected = False
-    renamer = Renamer()
-    async with DownloadClient() as client:
-        while not connected:
-            connected = await client.auth()
-            if not connected:
-                await asyncio.sleep(30)
-        for bangumi, torrents in torrent_pool:
-            client.add_torrent(torrents, bangumi)
-        renamer.rename(client)
-        await asyncio.sleep(settings.program.rename_time)
+class AsyncDownload(AsyncProgram):
+    def __init__(self) -> None:
+        super().__init__()
+        self.engine = RSSEngine()
+
+    async def run(self):
+        await self.stop()
+        task = asyncio.create_task(self.download_task_loop(), name="download_loop")
+        self.tasks.append(task)
+        logger.info("[AsyncDownload] Downloader start")
+
+    async def download_task_loop(self):
+        while True:
+            await self.download_task()
+            await asyncio.sleep(10)
+
+    async def download_task(self):
+        try:
+            downloader = AsyncDownloadController()
+            await downloader.download()
+        except TimeoutError:
+            logging.error("[Renamer Task] can not connect to downloader")
 
 
-async def rss_task():
-    # GET RSS FROM DATABASE
-    with Database() as db:
-        rss_items = db.rss.search_active()
-        for rss_item in rss_items:
-            rss_item_pool.append(rss_item)
-    pass
+if __name__ == "__main__":
+    import asyncio
+
+    from module.conf import setup_logger
+
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[logging.StreamHandler()],
+    )
+
+    settings.log.debug_enable = True
+    setup_logger()
+    asyncio.run(AsyncDownload().download_task_loop())
+    # if settings.bangumi_manage.eps_complete:
+    #     print(1)
+    #
+    # asyncio.run(AsyncRenamer().rename_task_loop())

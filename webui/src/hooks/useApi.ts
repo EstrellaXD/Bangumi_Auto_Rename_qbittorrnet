@@ -1,51 +1,51 @@
 type AnyAsyncFuntion<TData = any> = (...args: any[]) => Promise<TData>;
 
+interface Options<T = any> {
+  showMessage?: boolean;
+  onBeforeExecute?: () => void;
+  onSuccess?: (data: T) => void;
+  onError?: (error: any) => void;
+  onFinally?: () => void;
+}
+
 export function useApi<
-  TError = any,
   TApi extends AnyAsyncFuntion = AnyAsyncFuntion,
   TData = Awaited<ReturnType<TApi>>
 >(
   api: TApi,
-  options?: {
-    failRule?: (data: TData) => boolean;
-    message?: {
-      success?: string;
-      fail?: string;
-      error?: string;
-    };
-  }
+  {
+    showMessage = true,
+    onBeforeExecute,
+    onSuccess,
+    onError,
+    onFinally,
+  }: Options = {}
 ) {
   const data = ref<TData>();
   const isLoading = ref(false);
 
-  const fetchResult = createEventHook<TData>();
-  const fetchError = createEventHook<TError>();
-  const fetchFinally = createEventHook();
   const message = useMessage();
+  const { returnUserLangMsg } = useMyI18n();
 
-  function execute(...params: Parameters<TApi>) {
-    isLoading.value = true;
+  async function execute(...params: Parameters<TApi>) {
+    onBeforeExecute?.();
 
-    api(...params)
-      .then((res: TData) => {
-        data.value = res;
-        fetchResult.trigger(res);
+    try {
+      isLoading.value = true;
+      const res = await api(...params);
+      data.value = res;
 
-        if (options?.failRule && options.failRule(res)) {
-          options.message?.fail && message.error(options.message.fail);
-        } else {
-          options?.message?.success && message.success(options.message.success);
-        }
-      })
-      .catch((err: TError) => {
-        fetchError.trigger(err);
+      onSuccess?.(res);
 
-        options?.message?.error && message.error(options.message.error);
-      })
-      .finally(() => {
-        isLoading.value = false;
-        fetchFinally.trigger('');
-      });
+      if (showMessage && 'msg_en' in res) {
+        message.success(returnUserLangMsg(res));
+      }
+    } catch (err) {
+      onError?.(err);
+    } finally {
+      isLoading.value = false;
+      onFinally?.();
+    }
   }
 
   return {
@@ -53,8 +53,5 @@ export function useApi<
     isLoading,
 
     execute,
-    onResult: fetchResult.on,
-    onError: fetchError.on,
-    onFinally: fetchFinally.on,
   };
 }

@@ -15,29 +15,29 @@ defineEmits(['click']);
 const buttonSize = computed(() => {
   switch (props.type) {
     case 'large':
-      return 'wh-36px';
+      return 'wh-36';
     case 'medium':
-      return 'wh-24px';
+      return 'wh-24';
     case 'small':
-      return 'wh-12px';
+      return 'wh-12';
   }
 });
 
 const lineSize = computed(() => {
   switch (props.type) {
     case 'large':
-      return 'w-18px h-4px';
+      return 'w-18 h-4';
     case 'medium':
-      return 'w-3px h-12px';
+      return 'w-3 h-12';
     case 'small':
-      return 'w-2px h-6px';
+      return 'w-2 h-6';
   }
 });
 </script>
 
 <template>
   <button
-    :rounded="round ? '1/2' : '8px'"
+    :rounded="round ? '1/2' : '8'"
     f-cer
     rel
     transition-colors

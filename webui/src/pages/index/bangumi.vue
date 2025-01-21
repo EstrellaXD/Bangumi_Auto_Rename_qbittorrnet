@@ -1,26 +1,28 @@
 <script lang="ts" setup>
+definePage({
+  name: 'Bangumi List',
+});
+
 const { bangumi, editRule } = storeToRefs(useBangumiStore());
 const { getAll, updateRule, enableRule, openEditPopup, ruleManage } =
   useBangumiStore();
 
+const { isMobile } = useBreakpointQuery();
+
 onActivated(() => {
   getAll();
-});
-
-definePage({
-  name: 'Bangumi List',
 });
 </script>
 
 <template>
-  <div overflow-auto mt-12px flex-grow>
+  <div overflow-auto mt-12 flex-grow>
     <div>
       <transition-group
         name="bangumi"
         tag="div"
         flex="~ wrap"
-        gap-y-12px
-        gap-x-32px
+        gap="20"
+        :class="{ 'justify-center': isMobile }"
       >
         <ab-bangumi-card
           v-for="i in bangumi"

@@ -4,7 +4,7 @@ const { types, type, url } = storeToRefs(usePlayerStore());
 
 <template>
   <ab-fold-panel :title="$t('config.media_player_set.title')">
-    <div space-y-12px>
+    <div space-y-12>
       <ab-setting
         v-model:data="type"
         type="select"

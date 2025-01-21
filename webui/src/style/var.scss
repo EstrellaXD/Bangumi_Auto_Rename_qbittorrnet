@@ -1,0 +1,16 @@
+$scrollbar-color: #372a87;
+
+:root {
+  --scrollbar-size: 6px;
+  --scrollbar-color: transparent;
+  --scrollbar-thumb-color: #{rgba($scrollbar-color, 0.5)};
+  --scrollbar-thumb-hover-color: #{rgba($scrollbar-color, 1)};
+
+  --layout-padding: 16px;
+  --layout-gap: 12px;
+
+  @include forMobile {
+    --layout-padding: 10px;
+    --layout-gap: 10px;
+  }
+}

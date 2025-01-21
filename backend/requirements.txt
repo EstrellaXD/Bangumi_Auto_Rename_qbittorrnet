@@ -1,4 +1,5 @@
 anyio==3.7.0
+bencode.py ==4.0.0
 bs4==0.0.1
 certifi==2023.5.7
 charset-normalizer==3.1.0

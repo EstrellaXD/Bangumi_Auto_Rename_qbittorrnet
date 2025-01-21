@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel
 from sqlmodel import Field, SQLModel
 
@@ -13,10 +11,10 @@ class User(SQLModel, table=True):
 
 
 class UserUpdate(SQLModel):
-    username: Optional[str] = Field(
+    username: str|None = Field(
         None, min_length=4, max_length=20, regex=r"^[a-zA-Z0-9_]+$"
     )
-    password: Optional[str] = Field(None, min_length=8)
+    password: str|None = Field(None, min_length=8)
 
 
 class UserLogin(SQLModel):

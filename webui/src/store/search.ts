@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import { EMPTY, Subject, debounceTime, switchMap, tap } from 'rxjs';
 import type { BangumiRule, SearchResult } from '#/bangumi';
 
-export function useSearchStore() {
+export const useSearchStore = defineStore('search', () => {
   const bangumiList = ref<SearchResult[]>([]);
   const inputValue = ref<string>('');
 
@@ -18,13 +18,11 @@ export function useSearchStore() {
     loading.value = !!input;
   });
 
-  const { execute: getProviders, onResult: onGetProvidersResult } = useApi(
-    apiSearch.getProvider
-  );
-
-  onGetProvidersResult((res) => {
-    providers.value = res;
-  });
+  function getProviders() {
+    apiSearch.getProvider().then((res) => {
+      providers.value = res;
+    });
+  }
 
   /**
    * - 输入中 debounce 600ms 后触发搜索
@@ -64,12 +62,13 @@ export function useSearchStore() {
     input$,
     bangumiInfo$,
     inputValue,
-    onSearch,
-    clearSearch,
     loading,
     provider,
-    getProviders,
     providers,
     bangumiList,
+
+    onSearch,
+    clearSearch,
+    getProviders,
   };
-}
+});

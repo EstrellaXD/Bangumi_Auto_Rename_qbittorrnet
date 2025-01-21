@@ -1,16 +1,19 @@
+import asyncio
 import logging
 
 from module.conf import VERSION, settings
 from module.models import ResponseModel
 from module.update import (
+    cache_image,
     data_migration,
     first_run,
     from_30_to_31,
     start_up,
-    cache_image,
 )
 
-from .sub_thread import RenameThread, RSSThread
+# from .sub_thread import RenameTask, RSSTask
+from .aiocore import AsyncDownload, AsyncRenamer, AsyncRSS
+from .status import ProgramStatus
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +29,13 @@ figlet = r"""
 """
 
 
-class Program(RenameThread, RSSThread):
+class Program:
+    def __init__(self):
+        self.program_status = ProgramStatus()
+        self.renamer = AsyncRenamer()
+        self.rss = AsyncRSS()
+        self.download = AsyncDownload()
+
     @staticmethod
     def __start_info():
         for line in figlet.splitlines():
@@ -37,56 +46,57 @@ class Program(RenameThread, RSSThread):
         logger.info("GitHub: https://github.com/EstrellaXD/Auto_Bangumi/")
         logger.info("Starting AutoBangumi...")
 
-    def startup(self):
+    async def startup(self):
         self.__start_info()
-        if not self.database:
+        if not self.program_status.database:
             first_run()
             logger.info("[Core] No db file exists, create database file.")
             return {"status": "First run detected."}
-        if self.legacy_data:
+        if self.program_status.legacy_data:
             logger.info(
                 "[Core] Legacy data detected, starting data migration, please wait patiently."
             )
-            data_migration()
-        elif self.version_update:
+            await data_migration()
+        elif self.program_status.version_update:
             # Update database
-            from_30_to_31()
+            await from_30_to_31()
             logger.info("[Core] Database updated.")
-        if not self.img_cache:
+        if not self.program_status.img_cache:
             logger.info("[Core] No image cache exists, create image cache.")
-            cache_image()
-        self.start()
+            await cache_image()
+        await self.start()
 
-    def start(self):
-        self.stop_event.clear()
+    async def start(self):
+        # self.stop_event.clear()
         settings.load()
-        if self.downloader_status:
-            if self.enable_renamer:
-                self.rename_start()
-            if self.enable_rss:
-                self.rss_start()
-            logger.info("Program running.")
-            return ResponseModel(
-                status=True,
-                status_code=200,
-                msg_en="Program started.",
-                msg_zh="程序启动成功。",
-            )
-        else:
-            self.stop_event.set()
-            logger.warning("Program failed to start.")
-            return ResponseModel(
-                status=False,
-                status_code=406,
-                msg_en="Program failed to start.",
-                msg_zh="程序启动失败。",
-            )
+        await self.download.run()
+        if self.program_status.enable_rss:
+            await self.rss.run()
+        if self.program_status.enable_renamer:
+            await self.renamer.run()
+        logger.info("Program running.")
+        return ResponseModel(
+            status=True,
+            status_code=200,
+            msg_en="Program started.",
+            msg_zh="程序启动成功。",
+        )
+        # else:
+        #     self.stop_event.set()
+        #     logger.warning("Program failed to start.")
+        #     return ResponseModel(
+        #         status=False,
+        #         status_code=406,
+        #         msg_en="Program failed to start.",
+        #         msg_zh="程序启动失败。",
+        #     )
 
-    def stop(self):
-        if self.is_running:
-            self.stop_event.set()
-            self.rename_stop()
-            self.rss_stop()
+    async def stop(self):
+        if self.program_status.is_running:
+            # self.program_status.stop_event.set()
+            await self.download.stop()
+            await self.rss.stop()
+            await self.renamer.stop()
             return ResponseModel(
                 status=True,
                 status_code=200,
@@ -101,9 +111,9 @@ class Program(RenameThread, RSSThread):
                 msg_zh="程序未运行。",
             )
 
-    def restart(self):
-        self.stop()
-        self.start()
+    async def restart(self):
+        await self.stop()
+        await self.start()
         return ResponseModel(
             status=True,
             status_code=200,
@@ -112,7 +122,7 @@ class Program(RenameThread, RSSThread):
         )
 
     def update_database(self):
-        if not self.version_update:
+        if not self.program_status.version_update:
             return {"status": "No update found."}
         else:
             start_up()

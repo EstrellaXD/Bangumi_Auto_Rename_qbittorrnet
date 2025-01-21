@@ -2,6 +2,7 @@ import logging
 
 from module.models import Notification
 from module.network import RequestContent
+from module.utils.cache_image import str_to_url
 
 logger = logging.getLogger(__name__)
 
@@ -15,17 +16,18 @@ class ServerChanNotification(RequestContent):
 
     @staticmethod
     def gen_message(notify: Notification) -> str:
-        text = f"""
-        番剧名称：{notify.official_title}\n季度： 第{notify.season}季\n更新集数： 第{notify.episode}集\n{notify.poster_path}\n
-        """
-        return text.strip()
+        if notify.episode:
+            if notify.poster_path:
+                notify.poster_path = str_to_url(notify.poster_path.split("/")[-1])
+            notify.message += f"\n{notify.poster_path}\n".strip()
 
-    def post_msg(self, notify: Notification) -> bool:
-        text = self.gen_message(notify)
+    async def post_msg(self, notify: Notification) -> bool:
+        self.gen_message(notify)
         data = {
-            "title": notify.official_title,
-            "desp": text,
+            "title": notify.title,
+            "desp": notify.message,
         }
-        resp = self.post_data(self.notification_url, data)
-        logger.debug(f"ServerChan notification: {resp.status_code}")
-        return resp.status_code == 200
+        async with RequestContent() as req:
+            resp = await req.post_url(self.notification_url, data)
+            logger.debug(f"ServerChan notification: {resp.status_code}")
+            return resp.status_code == 200

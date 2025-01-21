@@ -1,22 +1,21 @@
 <script lang="ts" setup>
-import { useMessage } from 'naive-ui';
 import type { BangumiRule } from '#/bangumi';
 import type { RSS } from '#/rss';
 import { rssTemplate } from '#/rss';
 import { ruleTemplate } from '#/bangumi';
-import type { ApiError } from '#/api';
 
 /** v-model show */
 const show = defineModel('show', { default: false });
 
 const message = useMessage();
 const { getAll } = useBangumiStore();
+const { t } = useMyI18n();
 
 const rss = ref<RSS>(rssTemplate);
 const rule = defineModel<BangumiRule>('rule', { default: ruleTemplate });
 const parserType = ['mikan', 'tmdb', 'parser'];
 
-const window = reactive({
+const windowState = reactive({
   loading: false,
   rule: false,
   next: false,
@@ -30,91 +29,88 @@ watch(show, (val) => {
   if (!val) {
     rss.value = rssTemplate;
     setTimeout(() => {
-      window.next = false;
+      windowState.next = false;
     }, 300);
   } else if (val && rule.value.official_title !== '') {
-    window.next = true;
-    window.rule = true;
+    windowState.next = true;
+    windowState.rule = true;
   }
 });
 
-async function addRss() {
+function addRss() {
   if (rss.value.url === '') {
-    message.error('Please enter the RSS link!');
+    message.error(t('notify.please_enter', [t('notify.rss_link')]));
   } else if (rss.value.aggregate) {
-    try {
-      window.loading = true;
-      const data = await apiRSS.add(rss.value);
-      window.loading = false;
-      message.success(data.msg_en);
-      show.value = false;
-      console.log('rss', data);
-    } catch (error) {
-      const err = error as ApiError;
-      message.error(err.msg_en);
-      console.log('error', err.msg_en);
-      window.loading = false;
-    }
+    useApi(apiRSS.add, {
+      showMessage: true,
+      onBeforeExecute() {
+        windowState.loading = true;
+      },
+      onSuccess() {
+        show.value = false;
+      },
+      onFinally() {
+        windowState.loading = false;
+      },
+    }).execute(rss.value);
   } else {
-    try {
-      window.loading = true;
-      const data = await apiDownload.analysis(rss.value);
-      window.loading = false;
-      rule.value = data;
-      window.next = true;
-      window.rule = true;
-      console.log('rule', data);
-    } catch (error) {
-      const err = error as ApiError;
-      message.error(err.msg_en);
-      console.log('error', err.msg_en);
-    }
+    useApi(apiDownload.analysis, {
+      showMessage: true,
+      onBeforeExecute() {
+        windowState.loading = true;
+      },
+      onSuccess(res) {
+        rule.value = res;
+        windowState.next = true;
+        windowState.rule = true;
+      },
+      onFinally() {
+        windowState.loading = false;
+      },
+    }).execute(rss.value);
   }
 }
 
-async function collect() {
+function collect() {
   if (rule.value) {
-    try {
-      loading.collect = true;
-      const res = await apiDownload.collection(rule.value);
-      loading.collect = false;
-
-      if (res) {
-        message.success('Collect Success!');
+    useApi(apiDownload.collection, {
+      showMessage: true,
+      onBeforeExecute() {
+        loading.collect = true;
+      },
+      onSuccess() {
         getAll();
         show.value = false;
-      } else {
-        message.error('Collect Failed!');
-      }
-    } catch (error) {
-      message.error('Collect Error!');
-    }
+      },
+      onFinally() {
+        loading.collect = false;
+      },
+    }).execute(rule.value);
   }
 }
 
-async function subscribe() {
+function subscribe() {
   if (rule.value) {
-    try {
-      loading.subscribe = true;
-      const res = await apiDownload.subscribe(rule.value);
-      loading.subscribe = false;
-      if (res) {
-        message.success('Subscribe Success!');
+    useApi(apiDownload.subscribe, {
+      showMessage: true,
+      onBeforeExecute() {
+        loading.subscribe = true;
+      },
+      onSuccess() {
         getAll();
         show.value = false;
-      } else {
-        message.error('Subscribe Failed!');
-      }
-    } catch (error) {
-      message.error('Subscribe Error!');
-    }
+      },
+      onFinally() {
+        loading.subscribe = false;
+      },
+    }).execute(rule.value, rss.value);
   }
 }
 </script>
 
 <template>
-  <ab-popup v-model:show="show" :title="$t('topbar.add.title')" css="w-360px">
-    <div v-if="!window.next" space-y-12px>
+  <ab-popup v-model:show="show" :title="$t('topbar.add.title')" css="w-360">
+    <div v-if="!windowState.next" space-y-12>
       <ab-setting
         v-model:data="rss.url"
         :label="$t('topbar.add.rss_link')"
@@ -123,6 +119,7 @@ async function subscribe() {
           placeholder: $t('topbar.add.placeholder_link'),
         }"
       ></ab-setting>
+
       <ab-setting
         v-model:data="rss.name"
         :label="$t('topbar.add.name')"
@@ -131,11 +128,13 @@ async function subscribe() {
           placeholder: $t('topbar.add.placeholder_name'),
         }"
       ></ab-setting>
+
       <ab-setting
         v-model:data="rss.aggregate"
         :label="$t('topbar.add.aggregate')"
         type="switch"
       ></ab-setting>
+
       <ab-setting
         v-model:data="rss.parser"
         :label="$t('topbar.add.parser')"
@@ -147,21 +146,22 @@ async function subscribe() {
       ></ab-setting>
 
       <div flex="~ justify-end">
-        <ab-button size="small" :loading="window.loading" @click="addRss">{{
-          $t('topbar.add.button')
-        }}</ab-button>
+        <ab-button size="small" :loading="windowState.loading" @click="addRss">
+          {{ $t('topbar.add.button') }}
+        </ab-button>
       </div>
     </div>
 
-    <div v-else-if="window.rule">
+    <div v-else-if="windowState.rule">
       <ab-rule v-model:rule="rule"></ab-rule>
-      <div flex="~ justify-end" space-x-10px>
-        <ab-button size="small" :loading="loading.collect" @click="collect"
-          >Collect</ab-button
-        >
-        <ab-button size="small" :loading="loading.subscribe" @click="subscribe"
-          >Subscribe</ab-button
-        >
+      <div flex="~ justify-end gap-x-10">
+        <ab-button size="small" :loading="loading.collect" @click="collect">
+          {{ $t('topbar.add.collect') }}
+        </ab-button>
+
+        <ab-button size="small" :loading="loading.subscribe" @click="subscribe">
+          {{ $t('topbar.add.subscribe') }}
+        </ab-button>
       </div>
     </div>
   </ab-popup>

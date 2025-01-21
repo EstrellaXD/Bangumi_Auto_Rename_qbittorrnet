@@ -42,11 +42,15 @@ export const apiDownload = {
    * 新番
    * @param bangumiData - Bangumi 数据
    */
-  async subscribe(bangumiData: BangumiRule) {
-    const postData: BangumiAPI = {
+  async subscribe(bangumiData: BangumiRule, rss: RSS) {
+    const bangumi: BangumiAPI = {
       ...bangumiData,
       filter: bangumiData.filter.join(','),
       rss_link: bangumiData.rss_link.join(','),
+    };
+    const postData = {
+      data: bangumi,
+      rss,
     };
     const { data } = await axios.post<ApiSuccess>(
       'api/v1/rss/subscribe',

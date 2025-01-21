@@ -1,8 +1,8 @@
 import logging
-import re
 import xml.etree.ElementTree
 
-from module.conf import settings
+from httpx import Response
+
 from module.models import Torrent
 
 from .request_url import RequestURL
@@ -15,40 +15,61 @@ class RequestContent(RequestURL):
     async def get_torrents(
         self,
         _url: str,
-        _filter: str = None,
-        limit: int = None,
+        # _filter: str = "",
+        limit: int = 0,
         retry: int = 3,
     ) -> list[Torrent]:
         feeds = await self.get_xml(_url, retry)
-        _filter = _filter if _filter else "|".join(settings.rss_parser.filter)
+        # 思考了一下，req还是不需要筛选，筛选交给后面去做，这里就有什么返回什么
+        # _filter = _filter if _filter else "|".join(settings.rss_parser.filter)
+
         if feeds:
             torrent_titles, torrent_urls, torrent_homepage = rss_parser(feeds)
             torrents: list[Torrent] = []
             for _title, torrent_url, homepage in zip(
                 torrent_titles, torrent_urls, torrent_homepage
             ):
-                if re.search(_filter, _title) is None:
-                    torrents.append(
-                        Torrent(name=_title, url=torrent_url, homepage=homepage)
-                    )
-            return torrents if limit is None else torrents[:limit]
+                # filter_flag = re.search(_filter, _title) is None
+                # if filter_flag is True:
+                torrents.append(
+                    Torrent(name=_title, url=torrent_url, homepage=homepage)
+                )
+            return torrents if limit == 0 else torrents[:limit]
         else:
             logger.error(f"[Network] Torrents list is empty: {_url}")
             return []
 
-    async def get_xml(self, _url, retry: int = 3) -> xml.etree.ElementTree.Element:
+    async def get_xml(
+        self, _url, retry: int = 3
+    ) -> xml.etree.ElementTree.Element | None:
         req = await self.get_url(_url, retry)
         if req:
-            return xml.etree.ElementTree.fromstring(req.text)
+            try:
+                return xml.etree.ElementTree.fromstring(req.text)
+            except xml.etree.ElementTree.ParseError:
+                logging.warning(
+                    f"[Network] Cannot parser {_url}, please check the url is right"
+                )
+                return None
 
     # API JSON
     async def get_json(self, _url) -> dict:
         req = await self.get_url(_url)
         if req:
             return req.json()
+        else:
+            return {}
 
-    async def post_data(self, _url, data: dict, files: dict[str, bytes]) -> dict:
-        return await self.post_url(_url, data, files)
+    async def post_data(
+        self, _url, data: dict[str, str], files: dict[str, bytes]
+    ) -> Response | None:
+        req = await self.post_url(_url, data, files)
+
+        return req
+        # if req:
+        #     return req.json()
+        # else:
+        #     return {}
 
     async def get_html(self, _url):
         req = await self.get_url(_url)

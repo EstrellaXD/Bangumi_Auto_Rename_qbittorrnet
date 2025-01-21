@@ -1,15 +1,15 @@
 <script lang="ts" setup>
-const { user, login } = useAuth();
-
 definePage({
   name: 'Login',
 });
+
+const { user, login } = useAuth();
 </script>
 
 <template>
-  <div f-cer layout-container>
-    <ab-container :title="$t('login.title')" w-365px>
-      <div space-y-16px>
+  <div wh-screen f-cer bg-page>
+    <ab-container :title="$t('login.title')" w-365 max-w="90%">
+      <div space-y-16>
         <ab-label :label="$t('login.username')">
           <input
             v-model="user.username"
@@ -32,9 +32,9 @@ definePage({
         <div line></div>
 
         <div flex="~ justify-end">
-          <ab-button size="small" @click="login">{{
-            $t('login.login_btn')
-          }}</ab-button>
+          <ab-button size="small" @click="login">
+            {{ $t('login.login_btn') }}
+          </ab-button>
         </div>
       </div>
     </ab-container>

@@ -80,12 +80,12 @@ const azureItems: SettingItem<ExperimentalOpenAI>[] = [
 
 <template>
   <ab-fold-panel :title="$t('config.experimental_openai_set.title')">
-    <div fx-cer gap-2 mb-4 p-2 bg-amber-300 rounded-4px>
+    <div fx-cer gap-2 mb-4 p-2 bg-amber-300 rounded-4>
       <Caution />
       <span>{{ $t('config.experimental_openai_set.warning') }}</span>
     </div>
 
-    <div space-y-12px>
+    <div space-y-12>
       <ab-setting
         v-for="i in openAI.api_type === 'azure' ? azureItems : openAIItems"
         :key="i.configKey"

@@ -6,7 +6,7 @@ import {
   ListboxOptions,
 } from '@headlessui/vue';
 import { Down, Up } from '@icon-park/vue-next';
-import { isObject, isString } from 'lodash';
+import { isObject, isString } from 'radash';
 import type { SelectItem } from '#/components';
 
 const props = withDefaults(
@@ -67,13 +67,12 @@ watchEffect(() => {
     <div
       rel
       flex="inline col"
-      rounded-6px
-      border="1px black"
+      rounded-6
+      border="1 black"
       text-main
-      py-4px
-      px-12px
+      p="y-4 x-12"
     >
-      <ListboxButton bg-transparent fx-cer justify-between space-x-24px>
+      <ListboxButton bg-transparent fx-cer justify-between gap-x-24>
         <div>
           {{ label }}
         </div>
@@ -82,9 +81,9 @@ watchEffect(() => {
         </div>
       </ListboxButton>
 
-      <ListboxOptions mt-8px>
-        <div flex="~ items-end" justify-between space-x-24px>
-          <div flex="~ col" space-y-8px>
+      <ListboxOptions mt-8>
+        <div flex="~ items-end justify-between gap-x-24">
+          <div flex="~ col gap-y-8">
             <ListboxOption
               v-for="item in otherItems"
               v-slot="{ active }"

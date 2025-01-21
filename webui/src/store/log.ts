@@ -1,31 +1,26 @@
 export const useLogStore = defineStore('log', () => {
-  const log = ref('');
-  const { isLoggedin } = useAuth();
   const message = useMessage();
+  const { isLoggedIn } = useAuth();
+  const { t } = useMyI18n();
 
-  function get() {
-    const { execute, onResult } = useApi(apiLog.getLog);
+  const log = ref('');
 
-    onResult((value) => {
-      log.value = value;
-    });
-
-    if (isLoggedin.value) {
-      execute();
+  function getLog() {
+    if (isLoggedIn.value) {
+      apiLog.getLog().then((res) => {
+        log.value = res;
+      });
     }
   }
 
-  const { execute: reset, onResult: onClearLogResult } = useApi(
-    apiLog.clearLog
-  );
-
-  onClearLogResult((res) => {
-    if (res) {
+  const { execute: reset } = useApi(apiLog.clearLog, {
+    showMessage: true,
+    onSuccess() {
       log.value = '';
-    }
+    },
   });
 
-  const { pause: offUpdate, resume: onUpdate } = useIntervalFn(get, 3000, {
+  const { pause: offUpdate, resume: onUpdate } = useIntervalFn(getLog, 10000, {
     immediate: false,
     immediateCallback: true,
   });
@@ -34,15 +29,15 @@ export const useLogStore = defineStore('log', () => {
     const { copy: copyLog, isSupported } = useClipboard({ source: log });
     if (isSupported) {
       copyLog();
-      message.success('Copy Success!');
+      message.success(t('notify.copy_success'));
     } else {
-      message.error('Your browser does not support Clipboard API!');
+      message.error(t('notify.copy_failed'));
     }
   }
 
   return {
     log,
-    get,
+    getLog,
     reset,
     onUpdate,
     offUpdate,

@@ -8,19 +8,16 @@ const props = withDefaults(
   }
 );
 
-function abLabel() {
-  if (typeof props.label === 'function') {
-    return props.label();
-  } else {
-    return props.label;
-  }
-}
+const abLabel = computed(() => {
+  if (typeof props.label === 'function') return props.label();
+  else return props.label;
+});
 </script>
 
 <template>
-  <div flex="~ items-start" justify-between>
-    <div>{{ abLabel() }}</div>
+  <div flex="~ items-start justify-between">
+    <div>{{ abLabel }}</div>
 
-    <slot> </slot>
+    <slot></slot>
   </div>
 </template>

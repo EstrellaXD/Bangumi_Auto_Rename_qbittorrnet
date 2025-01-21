@@ -13,7 +13,7 @@ const programItems: SettingItem<Program>[] = [
     configKey: 'rss_time',
     label: () => t('config.normal_set.rss_interval'),
     type: 'input',
-    css: 'w-72px',
+    css: 'w-72',
     prop: {
       type: 'number',
       placeholder: 'port',
@@ -23,7 +23,7 @@ const programItems: SettingItem<Program>[] = [
     configKey: 'rename_time',
     label: () => t('config.normal_set.rename_interval'),
     type: 'input',
-    css: 'w-72px',
+    css: 'w-72',
     prop: {
       type: 'number',
       placeholder: 'port',
@@ -33,7 +33,7 @@ const programItems: SettingItem<Program>[] = [
     configKey: 'webui_port',
     label: () => t('config.normal_set.web_port'),
     type: 'input',
-    css: 'w-72px',
+    css: 'w-72',
     prop: {
       type: 'number',
       placeholder: 'port',
@@ -51,7 +51,7 @@ const logItems: SettingItem<Log> = {
 
 <template>
   <ab-fold-panel :title="$t('config.normal_set.title')">
-    <div space-y-12px>
+    <div space-y-12>
       <ab-setting
         v-for="i in programItems"
         :key="i.configKey"

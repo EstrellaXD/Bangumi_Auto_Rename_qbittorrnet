@@ -7,7 +7,7 @@ const { url } = storeToRefs(usePlayerStore());
 </script>
 
 <template>
-  <div overflow-auto mt-12px flex-grow>
+  <div overflow-auto mt-12 flex-grow>
     <template v-if="url === ''">
       <div wh-full f-cer text-h1 text-primary>
         <RouterLink to="/config" hover:underline>{{
@@ -20,10 +20,9 @@ const { url } = storeToRefs(usePlayerStore());
       :src="url"
       frameborder="0"
       allowfullscreen="true"
-      w-full
-      h-full
+      wh-full
       flex-1
-      rounded-12px
+      rounded-12
     ></iframe>
   </div>
 </template>

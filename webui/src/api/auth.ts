@@ -1,4 +1,5 @@
-import type { LoginSuccess, Logout, Update } from '#/auth';
+import type { LoginSuccess, Update } from '#/auth';
+import type { ApiSuccess } from '#/api';
 
 export const apiAuth = {
   async login(username: string, password: string) {
@@ -26,8 +27,8 @@ export const apiAuth = {
   },
 
   async logout() {
-    const { data } = await axios.get<Logout>('api/v1/auth/logout');
-    return data.message === 'logout success';
+    const { data } = await axios.get<ApiSuccess>('api/v1/auth/logout');
+    return data;
   },
 
   async update(username: string, password: string) {

@@ -1,8 +1,9 @@
 import logging
 import os
 import signal
+from contextlib import asynccontextmanager
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
 from module.conf import VERSION
@@ -17,14 +18,23 @@ program = Program()
 router = APIRouter(tags=["program"])
 
 
-@router.on_event("startup")
-async def startup():
-    program.startup()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 启动事件
+    await program.startup()
+    yield
+    # 关闭事件
+    await program.stop()
 
 
-@router.on_event("shutdown")
-async def shutdown():
-    program.stop()
+# @router.on_event("startup")
+# async def startup():
+#     await program.startup()
+#
+#
+# @router.on_event("shutdown")
+# async def shutdown():
+#     await program.stop()
 
 
 @router.get(
@@ -32,7 +42,8 @@ async def shutdown():
 )
 async def restart():
     try:
-        resp = program.restart()
+        # resp = await program.restart()
+        resp = await program.restart()
         return u_response(resp)
     except Exception as e:
         logger.debug(e)
@@ -51,7 +62,7 @@ async def restart():
 )
 async def start():
     try:
-        resp = program.start()
+        resp = await program.start()
         return u_response(resp)
     except Exception as e:
         logger.debug(e)
@@ -69,22 +80,22 @@ async def start():
     "/stop", response_model=APIResponse, dependencies=[Depends(get_current_user)]
 )
 async def stop():
-    return u_response(program.stop())
+    return u_response(await program.stop())
 
 
 @router.get("/status", response_model=dict, dependencies=[Depends(get_current_user)])
 async def program_status():
-    if not program.is_running:
+    if not program.program_status.is_running:
         return {
             "status": False,
             "version": VERSION,
-            "first_run": program.first_run,
+            "first_run": program.program_status.first_run,
         }
     else:
         return {
             "status": True,
             "version": VERSION,
-            "first_run": program.first_run,
+            "first_run": program.program_status.first_run,
         }
 
 
@@ -92,12 +103,15 @@ async def program_status():
     "/shutdown", response_model=APIResponse, dependencies=[Depends(get_current_user)]
 )
 async def shutdown_program():
-    program.stop()
+    await program.stop()
     logger.info("Shutting down program...")
     os.kill(os.getpid(), signal.SIGINT)
     return JSONResponse(
         status_code=200,
-        content={"msg_en": "Shutdown program successfully.", "msg_zh": "关闭程序成功。"},
+        content={
+            "msg_en": "Shutdown program successfully.",
+            "msg_zh": "关闭程序成功。",
+        },
     )
 
 
@@ -109,4 +123,4 @@ async def shutdown_program():
     dependencies=[Depends(get_current_user)],
 )
 async def check_downloader_status():
-    return program.check_downloader()
+    return await program.program_status.check_downloader()

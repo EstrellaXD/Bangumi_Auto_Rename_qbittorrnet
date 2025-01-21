@@ -35,11 +35,11 @@ const data = defineModel<any>('data');
         v-bind="prop"
       />
 
-      <div v-else-if="type === 'dynamic-tags'" max-w-200px overflow-auto pb-1>
+      <div v-else-if="type === 'dynamic-tags'" max-w-200 overflow-auto pb-1>
         <NDynamicTags v-model:value="data" size="small"></NDynamicTags>
       </div>
     </ab-label>
 
-    <div v-if="bottomLine" line my-12px></div>
+    <div v-if="bottomLine" line my-12></div>
   </div>
 </template>

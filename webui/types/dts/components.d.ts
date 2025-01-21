@@ -22,7 +22,6 @@ declare module '@vue/runtime-core' {
     AbLabel: typeof import('./../../src/components/ab-label.vue')['default']
     AbPageTitle: typeof import('./../../src/components/basic/ab-page-title.vue')['default']
     AbPopup: typeof import('./../../src/components/ab-popup.vue')['default']
-    AbRssItem: typeof import('./../../src/components/ab-rss-item.vue')['default']
     AbRule: typeof import('./../../src/components/ab-rule.vue')['default']
     AbSearch: typeof import('./../../src/components/basic/ab-search.vue')['default']
     AbSearchBar: typeof import('./../../src/components/ab-search-bar.vue')['default']
@@ -42,6 +41,7 @@ declare module '@vue/runtime-core' {
     ConfigParser: typeof import('./../../src/components/setting/config-parser.vue')['default']
     ConfigPlayer: typeof import('./../../src/components/setting/config-player.vue')['default']
     ConfigProxy: typeof import('./../../src/components/setting/config-proxy.vue')['default']
+    MediaQuery: typeof import('./../../src/components/media-query.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }

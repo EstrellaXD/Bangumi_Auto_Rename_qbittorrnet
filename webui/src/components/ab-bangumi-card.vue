@@ -16,9 +16,9 @@ defineEmits(['click']);
 </script>
 
 <template>
-  <div v-if="type === 'primary'" w-150px is-btn @click="() => $emit('click')">
-    <div rounded-4px overflow-hidden poster-shandow rel>
-      <div w-full h-210px>
+  <div v-if="type === 'primary'" w-150 is-btn @click="() => $emit('click')">
+    <div rounded-4 overflow-hidden poster-shandow rel>
+      <div w-full h-210>
         <template v-if="bangumi.poster_link">
           <img :src="bangumi.poster_link" alt="poster" wh-full />
         </template>
@@ -36,54 +36,55 @@ defineEmits(['click']);
         z-1
         inset-0
         opacity-0
-        transition-all
-        duration-300
-        hover:backdrop-blur-2px
-        hover:bg-white
-        hover:bg-opacity-30
-        hover:opacity-100
-        active:duration-0
-        active:bg-opacity-60
+        transition="all duration-300"
+        hover="backdrop-blur-2 bg-white bg-opacity-30 opacity-100"
+        active="duration-0 bg-opacity-60"
         class="group"
       >
         <div
           text-white
           rounded="1/2"
-          wh-44px
+          wh-44
           f-cer
           bg-theme-row
-          class="group-active:poster-pen-active"
+          group-active="poster-pen-active"
         >
           <Write size="20" />
         </div>
       </div>
     </div>
 
-    <div py-4px>
+    <div py-4>
       <div text-h3 truncate>{{ bangumi.official_title }}</div>
-      <ab-tag :title="`Season ${bangumi.season}`" type="primary" />
+
+      <div space-x-5>
+        <ab-tag :title="`Season ${bangumi.season}`" type="primary" />
+        <ab-tag
+          v-if="bangumi.group_name"
+          :title="bangumi.group_name"
+          type="primary"
+        />
+      </div>
     </div>
   </div>
   <div
     v-else-if="type === 'search'"
-    w-480px
-    rounded-12px
-    p-4px
+    w-480
+    rounded-12
+    p-4
     shadow
-    transition-opacity
-    ease-in-out
-    duration-300
-    class="card-border"
+    bg="#eee5f4"
+    transition="opacity ease-in-out duration-300"
   >
-    <div bg-white rounded-8px p-12px fx-cer justify-between space-x-16px>
-      <div w-400px space-x-16px fx-cer>
-        <div h-44px w-72px rounded-6px overflow-hidden>
+    <div bg-white rounded-8 p-12 fx-cer justify-between gap-x-16>
+      <div w-400 gap-x-16 fx-cer>
+        <div h-44 w-72 rounded-6 overflow-hidden>
           <template v-if="bangumi.poster_link">
             <img
               :src="bangumi.poster_link"
               alt="poster"
               w-full
-              class="search-image"
+              translate-y="-25%"
             />
           </template>
 
@@ -93,23 +94,21 @@ defineEmits(['click']);
             </div>
           </template>
         </div>
-        <div flex-col space-y-4px>
-          <div w-300px text-h3 text-primary truncate>
+        <div flex="~ col gap-y-4">
+          <div w-300 text="h3 primary" truncate>
             {{ bangumi.official_title }}
           </div>
-          <div flex space-x-8px>
-            <ab-tag :title="`Season ${bangumi.season}`" type="primary" />
-            <ab-tag
-              v-if="bangumi.group_name !== ''"
-              :title="bangumi.group_name"
-              type="primary"
-            />
-            <ab-tag v-if="bangumi.dpi" :title="bangumi.dpi" type="primary" />
-            <ab-tag
-              v-if="bangumi.subtitle"
-              :title="bangumi.subtitle"
-              type="primary"
-            />
+          <div flex="~ gap-x-8">
+            <template
+              v-for="i in ['season', 'group_name', 'subtitle']"
+              :key="i"
+            >
+              <ab-tag
+                v-if="bangumi[i]"
+                :title="i === 'season' ? `Season ${bangumi[i]}` : bangumi[i]"
+                type="primary"
+              />
+            </template>
           </div>
         </div>
       </div>
@@ -117,13 +116,3 @@ defineEmits(['click']);
     </div>
   </div>
 </template>
-
-<style>
-.card-border {
-  background: #eee5f4;
-}
-
-.search-image {
-  transform: translateY(-25%);
-}
-</style>

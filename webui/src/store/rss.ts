@@ -1,27 +1,12 @@
 import type { RSS } from '#/rss';
-import type { ApiSuccess } from '#/api';
 
 export const useRSSStore = defineStore('rss', () => {
-  const message = useMessage();
-  const rss = ref<RSS[]>();
+  const rss = ref<RSS[]>([]);
   const selectedRSS = ref<number[]>([]);
 
-  const { execute: getAll, onResult: onRSSResult } = useApi(apiRSS.get);
-  const { execute: updateRSS, onResult: onUpdateRSSResult } = useApi(
-    apiRSS.update
-  );
-  const { execute: disableRSS, onResult: onDisableRSSResult } = useApi(
-    apiRSS.disableMany
-  );
-  const { execute: deleteRSS, onResult: onDeleteRSSResult } = useApi(
-    apiRSS.deleteMany
-  );
+  async function getAll() {
+    const res = await apiRSS.get();
 
-  const { execute: enableRSS, onResult: onEnableRSSResult } = useApi(
-    apiRSS.enableMany
-  );
-
-  onRSSResult((res) => {
     function sort(arr: RSS[]) {
       return arr.sort((a, b) => b.id - a.id);
     }
@@ -30,40 +15,34 @@ export const useRSSStore = defineStore('rss', () => {
     const disabled = sort(res.filter((e) => !e.enabled));
 
     rss.value = [...enabled, ...disabled];
-  });
-
-  function refresh() {
-    getAll();
   }
 
-  function disableSelected() {
-    disableRSS(selectedRSS.value);
-  }
+  const opts = {
+    showMessage: true,
+    onSuccess() {
+      getAll();
+      selectedRSS.value = [];
+    },
+  };
 
-  function deleteSelected() {
-    deleteRSS(selectedRSS.value);
-  }
+  const { execute: updateRSS } = useApi(apiRSS.update, opts);
+  const { execute: disableRSS } = useApi(apiRSS.disableMany, opts);
+  const { execute: deleteRSS } = useApi(apiRSS.deleteMany, opts);
+  const { execute: enableRSS } = useApi(apiRSS.enableMany, opts);
 
-  function enableSelected() {
-    enableRSS(selectedRSS.value);
-  }
-
-  function actionSuccess(apiRes: ApiSuccess) {
-    message.success(apiRes.msg_en);
-    refresh();
-  }
-
-  onUpdateRSSResult(actionSuccess);
-  onDeleteRSSResult(actionSuccess);
-  onDisableRSSResult(actionSuccess);
-  onEnableRSSResult(actionSuccess);
+  const disableSelected = () => disableRSS(selectedRSS.value);
+  const deleteSelected = () => deleteRSS(selectedRSS.value);
+  const enableSelected = () => enableRSS(selectedRSS.value);
 
   return {
     rss,
-    getAll,
-    refresh,
     selectedRSS,
+
+    getAll,
     updateRSS,
+    disableRSS,
+    deleteRSS,
+    enableRSS,
     disableSelected,
     deleteSelected,
     enableSelected,

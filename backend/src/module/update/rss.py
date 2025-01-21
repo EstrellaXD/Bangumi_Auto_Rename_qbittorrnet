@@ -1,6 +1,6 @@
-from module.rss import RSSEngine
+from module.rss import RSSManager
 
 
-def update_main_rss(rss_link: str):
-    with RSSEngine() as engine:
-        engine.add_rss(rss_link, "main", True)
+async def update_main_rss(rss_link: str):
+    engine = RSSManager()
+    await engine.add_rss(rss_link, "main", True)

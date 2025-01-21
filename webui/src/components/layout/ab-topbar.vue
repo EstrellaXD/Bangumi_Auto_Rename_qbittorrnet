@@ -94,21 +94,30 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div h-60px bg-theme-row text-white rounded-16px fx-cer px-24px>
-    <div flex space-x-16px>
-      <div fx-cer space-x-16px>
-        <img src="/images/logo-light.svg" alt="favicon" wh-24px />
+  <div
+    h="pc:60 50"
+    bg-theme-row
+    text-white
+    rounded="pc:16 10"
+    fx-cer
+    px="pc:24 15"
+  >
+    <div flex="~ gap-x-16">
+      <div fx-cer gap-x="pc:16 10">
+        <img src="/images/logo-light.svg" alt="favicon" wh="pc:24 20" />
         <img
           v-show="onSearchFocus === false"
           src="/images/AutoBangumi.svg"
           alt="AutoBangumi"
-          h-24px
           rel
-          top-2px
+          h="18 pc:24"
+          pc:top-2
         />
       </div>
 
-      <ab-search-bar @add-bangumi="addSearchResult" />
+      <div hidden pc:block>
+        <ab-search-bar @add-bangumi="addSearchResult" />
+      </div>
     </div>
 
     <div ml-auto>
@@ -116,7 +125,7 @@ onUnmounted(() => {
         :items="items"
         :running="running"
         @click-add="() => (showAddRSS = true)"
-        @change-lang="() => changeLocale()"
+        @change-lang="changeLocale"
       />
     </div>
     <ab-change-account v-model:show="showAccount"></ab-change-account>

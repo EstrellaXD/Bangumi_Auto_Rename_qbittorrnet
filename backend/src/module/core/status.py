@@ -16,9 +16,10 @@ class ProgramStatus(Checker):
 
     @property
     def is_running(self):
-        if self.stop_event.is_set() or self.check_first_run():
-            return False
-        else:
+        # FIX: no event
+        # if self.stop_event.is_set() or self.check_first_run():
+        #     return False
+        # else:
             return True
 
     @property

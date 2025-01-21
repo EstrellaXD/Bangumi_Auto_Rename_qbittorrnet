@@ -40,13 +40,11 @@ function close() {
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-black bg-opacity-25" />
+        <div fixed inset-0 bg="black opacity-25" />
       </TransitionChild>
 
-      <div class="fixed inset-0 overflow-y-auto">
-        <div
-          class="flex min-h-full items-center justify-center p-4 text-center"
-        >
+      <div fixed inset-0 overflow-y-auto>
+        <div flex="~ items-center justify-center" min-h-full p-4 text-center>
           <TransitionChild
             as="template"
             enter="duration-300 ease-out"
