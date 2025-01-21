@@ -53,6 +53,7 @@ class Network:
     origin_country: str
 
 
+@dataclass
 class LastEpisodeToAir:
     id: int
     name: str
@@ -68,25 +69,25 @@ class LastEpisodeToAir:
     show_id: int
     still_path: str
 
-
+@dataclass
 class ProductionCompany:
     id: int
-    logo_path: str | None = None
     name: str
     origin_country: str
+    logo_path: str | None = None
 
-
+@dataclass
 class Season:
     air_date: str | None
     episode_count: int
     id: int
     name: str
     overview: str
-    poster_path: str | None = None
     season_number: int
     vote_average: float
+    poster_path: str | None = None
 
-
+@dataclass
 class TVShow:
     adult: bool
     backdrop_path: str
@@ -101,7 +102,6 @@ class TVShow:
     last_air_date: str
     last_episode_to_air: LastEpisodeToAir
     name: str
-    next_episode_to_air: str | None = None
     networks: list[Network]
     number_of_episodes: int
     number_of_seasons: int
@@ -114,6 +114,7 @@ class TVShow:
     production_companies: list[ProductionCompany]
     production_countries: list[dict[str, str]]
     seasons: list[Season]
+    next_episode_to_air: str | None = None
 
 
 LANGUAGE = {"zh": "zh-CN", "jp": "ja-JP", "en": "en-US"}

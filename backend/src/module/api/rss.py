@@ -256,7 +256,6 @@ async def analysis(rss: RSSItem):
     "/collect", response_model=APIResponse, dependencies=[Depends(get_current_user)]
 )
 async def download_collection(data: Bangumi):
-    # resp = await collector.collect_season(data, data.rss_link)
     await engine.refresh_rss(bangumi=data)
     # TODO: resp 要等后面统一改
     resp = True

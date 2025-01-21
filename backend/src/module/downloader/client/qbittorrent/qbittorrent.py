@@ -5,7 +5,10 @@ import httpx
 
 from module.conf import get_plugin_config
 from module.downloader.client.expection import AuthorizationError
-from module.downloader.client.qbittorrent.config import Config as DownloaderConfig
+
+from ....conf import settings
+from ..base_downloader import BaseDownloader
+from .config import Config as DownloaderConfig
 
 logger = logging.getLogger(__name__)
 
@@ -27,14 +30,15 @@ QB_API_URL = {
 }
 
 
-class Downloader:
-    config = get_plugin_config(DownloaderConfig(), "downloader")
+class Downloader(BaseDownloader):
+
 
     def __init__(self):  # , host: str, username: str, password: str, ssl: bool
+        self.config:DownloaderConfig = get_plugin_config(DownloaderConfig(), "downloader")
         self.host = self.config.host
         self.username = self.config.username
         self.password = self.config.password
-        self.ssl = self.config.ssl
+        self.ssl = settings.downloader.ssl
         self._client = httpx.AsyncClient(
             base_url=self.host,
             trust_env=self.ssl,
@@ -47,7 +51,18 @@ class Downloader:
                 data={"username": self.username, "password": self.password},
                 timeout=5,
             )
-            return resp.text == "Ok."
+            # 403 说明尝试太多次了
+            if resp.status_code == 403:
+                logger.error(
+                    "[qbittorrent] your ip has been banned by qbittorrent, please remove the ban and try again."
+                )
+                return False
+            if resp.status_code == 200 and resp.text == "Ok.":
+                    logger.debug("[qbittorrent] login success")
+                    return True
+            raise AuthorizationError(
+                f"Failed to login to qbittorrent. my host  {self.host} is error or username/password {self.username}/{self.password} is error"
+            )
         except (httpx.ConnectError, httpx.TimeoutException, httpx.ReadTimeout) as e:
             logger.error(
                 f"[qbittorrent] Auth error,please check your username/password {self.username}/{self.password}"
@@ -84,19 +99,19 @@ class Downloader:
             timeout=5,
         )
 
-    async def get_torrent_files(self, _hash: str) -> list[str]:
-        data = {"hash": _hash}
+    async def get_torrent_files(self, hash: str) -> list[str]:
+        data = {"hash": hash}
         reps = await self._client.get(
             url=QB_API_URL["getFiles"],
             params=data,
         )
         if "Not Found" in reps.text:
-            logging.warning(f"Cannot found {_hash}")
+            logging.warning(f"Cannot found {hash}")
             return []
         files_name = [file["name"] for file in reps.json()]
         return files_name
 
-    async def torrents_info(self, status_filter, category, tag=None, limit=0):
+    async def torrents_info(self, status_filter = "completed", category = "Bangumi", tag=None, limit=0):
         data = {
             "filter": status_filter,
             "category": category,
@@ -215,16 +230,14 @@ class Downloader:
         return resp.status_code == 200
 
     async def __aenter__(self):
+        # TODO: 不应该每次都在这里登陆, 这里检查一下登陆状态就好了
         if not await self.check_host():
             logger.warning(
                 f"[qbittorrent] Failed to connect to {self.host}, retry in 30 seconds."
             )
-            await asyncio.sleep(30)
+            # 直接退出
         if not await self.auth():
             await self._client.aclose()
-            raise AuthorizationError(
-                f"Failed to login to qbittorrent. my host  {self.host} is error or username/password {self.username}/{self.password} is error"
-            )
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):

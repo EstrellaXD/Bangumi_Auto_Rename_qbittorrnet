@@ -1,4 +1,5 @@
 from typing import Any, TypeVar
+from pydantic import BaseModel
 
 K = TypeVar("K")
 def deep_update(
@@ -11,9 +12,11 @@ def deep_update(
             if (
                 k in updated_mapping
                 and isinstance(updated_mapping[k], dict)
-                and isinstance(v, dict)
             ):
-                updated_mapping[k] = deep_update(updated_mapping[k], v)
+                if isinstance(v, dict):
+                    updated_mapping[k] = deep_update(updated_mapping[k], v)
+                if isinstance(v, BaseModel):
+                    updated_mapping[k] = deep_update(updated_mapping[k], v.dict())
             else:
                 updated_mapping[k] = v
     return updated_mapping

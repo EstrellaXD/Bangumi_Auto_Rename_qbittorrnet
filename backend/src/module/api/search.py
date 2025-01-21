@@ -1,5 +1,3 @@
-import asyncio
-
 from fastapi import APIRouter, Depends, Query
 from sse_starlette.sse import EventSourceResponse
 
@@ -17,29 +15,18 @@ async def search_torrents(site: str = "mikan", keywords: str = Query(None)):
     """
     Server Send Event for per Bangumi item
     """
-    if not keywords:
+    # TODO: 是否要大于一定才开始
+    if not keywords or len(keywords) < 2:
         return []
-    keywords:list[str] = keywords.split(" ")
+    keywords: list[str] = keywords.split(" ")
 
-    # return await SearchTorrent().analyse_keyword(keywords=keywords, site=site)
     return EventSourceResponse(
-        await SearchTorrent().analyse_keyword(keywords=keywords, site=site)
+        SearchTorrent().analyse_keyword(keywords=keywords, site=site)
     )
 
 
-@router.get(
-    "/provider", response_model=list[str], dependencies=[Depends(get_current_user)]
-)
-async def search_provider():
+@router.get( "/provider", response_model=list[str], dependencies=[Depends(get_current_user)])
+async def search_provider()->list[str]:
+    """从配置文件中获取支持的搜索引擎
+    """
     return list(SEARCH_CONFIG.keys())
-
-
-if __name__ == "__main__":
-    import json
-
-    ans = asyncio.run(search_torrents(keywords="败北 ANI"))
-    for i in list(ans):
-        i = json.loads(i)
-        print(i)
-    # decoded_objects = []
-    # for json_str in next(ans):

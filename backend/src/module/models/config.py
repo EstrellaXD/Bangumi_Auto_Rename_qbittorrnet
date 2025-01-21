@@ -26,17 +26,23 @@ class Program(BaseModel):
 
 class Downloader(BaseModel):
     type: str = Field(default="qbittorrent", description="Downloader type")
+    path: str = Field(default="/downloads/Bangumi", description="Downloader path")
+    host: str = Field("172.17.0.1:8080", alias="host", description="Downloader host")
+    ssl: bool = Field(False, description="Downloader ssl")
 
     class Config:
-        extra = "allow"  # This allows extra fields not defined in the model
+        extra:str = "allow"  # This allows extra fields not defined in the model
 
-    # host: str = Field("172.17.0.1:8080", alias="host", description="Downloader host")
+    @validator("host", pre=True)
+    def validate_host(cls, value: str) -> str:
+        # 如果输入值没有以 http:// 或 https:// 开头，自动加上 http://
+        if not value.startswith(("http://", "https://")):
+            value = f"http://{value}"
+        return value
     # username: str = Field("admin", alias="username", description="Downloader username")
     # password: str = Field(
     #     "adminadmin", alias="password", description="Downloader password"
     # )
-    # path: str = Field("/downloads/Bangumi", description="Downloader path")
-    # ssl: bool = Field(False, description="Downloader ssl")
 
 
 class QbDownloader(Downloader):
@@ -161,5 +167,5 @@ class Config(BaseModel):
 
 
 if __name__ == "__main__":
-    t = Program(rss_time="1")
-    print(t.keys)
+    pass
+    # t = Program(rss_time="1")

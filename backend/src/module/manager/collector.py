@@ -17,42 +17,7 @@ class SeasonCollector:
         self.st = SearchTorrent()
         self.rss_engine = RSSEngine()
 
-    async def collect_season(self, bangumi: Bangumi, link: str = None):
-        """
-        FIXME: 整体已经没用,等删
-        collection 有 bangumi 和 link,就是感觉 link 没用
-        eps 的时候 有 bangumi ,但不能用 bangumi 的 link
-        """
-        logger.info(
-            f"Start collecting {bangumi.official_title} Season {bangumi.season}..."
-        )
-        if link:
-            await self.rss_engine.refresh_rss(bangumi=bangumi)
-        if not link:
-
-            await self.rss_engine.refresh_rss(bangumi=bangumi)
-        # if not link:
-        #     # torrents = await self.st.search_season(bangumi)
-        #     self.rss_engine.refresh_rss(bangumi=bangumi)
-        # else:
-        #     torrents = await self.st.search_torrents(RSSItem(url=link))
-        #
-        #     if torrents:
-        #         await DownloadQueue().add_torrents(torrents=torrents, bangumi=bangumi)
-        #         logger.info(
-        #             f"Collections of {bangumi.official_title} Season {bangumi.season} completed."
-        #         )
-        #         bangumi.eps_collect = True
-        #         with Database() as db:
-        #             db.bangumi.update(bangumi)
-        #             # if db.bangumi.update(bangumi):
-        #             #     db.bangumi.add(bangumi)
-        #         return True
-        #     else:
-        #         logger.warning(
-        #             f"Already collected {bangumi.official_title} Season {bangumi.season}."
-        #         )
-        #         return False
+    
 
     @staticmethod
     async def subscribe_season(data: Bangumi, parser: str = "mikan"):

@@ -4,7 +4,7 @@ from pathlib import Path
 import httpx
 
 from module.conf import VERSION, settings
-from module.downloader import DownloadClient
+from module.downloader import Client
 from module.models import Config
 from module.network import RequestContent
 from module.update import version_check
@@ -51,22 +51,12 @@ class Checker:
 
     @staticmethod
     async def check_downloader() -> bool:
+        # 改动说明: 之前是要能连上, 现在只要检测到 host 就好了
         try:
-            url = (
-                f"http://{settings.downloader.host_}"
-                if "://" not in settings.downloader.host_
-                else f"{settings.downloader.host_}"
-            )
-
-            # response = await RequestContent().get(url, timeout=2)
-            # if settings.downloader.type in response.text.lower():
-            # 能auth 就算正确, 类型判断无用
-            async with DownloadClient() as client:
-                if await client.auth():
-                    return True
+            client = Client
+            if await client.downloader.check_host():
+                return True
             return False
-            # else:
-            #     return False
         except httpx.ReadTimeout:
             logger.error("[Checker] Downloader connect timeout.")
             return False
@@ -86,6 +76,8 @@ class Checker:
             img_path.mkdir()
             return False
 
-if __name__ =="__main__":
+
+if __name__ == "__main__":
     import asyncio
-    # print(asyncio.run(Checker().check_downloader()))
+
+    print(asyncio.run(Checker().check_downloader()))

@@ -23,6 +23,7 @@ class Bangumi(SQLModel, table=True):
     eps_collect: bool = Field(default=False, alias="eps_collect", title="是否已收集")
     offset: int = Field(default=0, alias="offset", title="番剧偏移量")
     filter: str = Field(default="", alias="filter", title="番剧过滤器")
+    # 感觉是不是与 rss 表用外键关联更好
     rss_link: str = Field(default="", alias="rss_link", title="番剧RSS链接")
     poster_link: str | None = Field(
         default=None, alias="poster_link", title="番剧海报链接"

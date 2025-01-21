@@ -3,7 +3,7 @@ import logging
 
 from module.database import Database, engine
 from module.downloader.client.expection import AuthorizationError
-from module.downloader.download_client import DownloadClient
+from module.downloader.download_client import Client as client
 from module.models import Bangumi, Torrent
 
 MIN_SIZE = 10
@@ -15,7 +15,7 @@ download_len_event = asyncio.Event()
 
 class DownloadQueue:
     def __init__(self) -> None:
-        self.queue = queue
+        self.queue:asyncio.Queue[tuple[Torrent, Bangumi]] = queue
 
     async def add_torrents(self, torrents: list[Torrent], bangumi: Bangumi):
         for torrent in torrents:
@@ -32,34 +32,29 @@ class DownloadQueue:
 
 
 class AsyncDownloadController:
+    # 10秒拿5个
     async def download(self):
         await download_add_event.wait()  # 等待事件被设置
         download_add_event.clear()  # 重置事件
         # 等待足够数量的元素或超时
-        try:
-            async with DownloadClient() as client:
-                try:
-                    await asyncio.wait_for(download_len_event.wait(), timeout=3)
-                except asyncio.TimeoutError:
-                    logger.debug(
-                        "[Download Controller] Timeout reached. reach all available items"
-                    )
-                # 取出队列中所有现有的元素
-                download_len_event.clear()
-                tasks = []
-                torrents = []
-                while not queue.empty():
-                    torrent, bangumi = queue.get_nowait()
-                    logging.debug(f"[Download Queue] start download {torrent.name}")
-                    torrents.append(torrent)
-                    tasks.append(client.add_torrent(torrent, bangumi))
-                    queue.task_done()
-                await asyncio.gather(*tasks, return_exceptions=True)
-            with Database() as database:
-                database.torrent.add_all(torrents)
-        except AuthorizationError as e:
-            logger.error(f"[Download Controller] AuthorizationError: {e}")
-            await asyncio.sleep(30)
+        # await asyncio.wait_for(self._download(client), timeout=5)
+        await download_len_event.wait()
+        tasks = []
+        torrents = []
+        # 一次取五个torrent 
+        for _ in range(5):
+            if queue.empty():
+                # 为空时退出
+                download_add_event.clear()
+                break
+            torrent, bangumi = queue.get_nowait()
+            logging.debug(f"[Download Queue] start download {torrent.name}")
+            torrents.append(torrent)
+            tasks.append(client.add_torrent(torrent, bangumi))
+            queue.task_done()
+        await asyncio.gather(*tasks, return_exceptions=True)
+        with Database() as database:
+            database.torrent.add_all(torrents)
 
 
 if __name__ == "__main__":

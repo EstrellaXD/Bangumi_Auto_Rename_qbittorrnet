@@ -7,6 +7,7 @@ from urllib3.util import parse_url
 from module.network import RequestContent
 from module.utils import gen_poster_path
 
+# TODO:改进official_title 作为标识, tmdb有id, mikan也有bangumi id
 
 class WebPage(ABC):
     """

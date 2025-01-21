@@ -10,6 +10,9 @@ from .user import UserDatabase
 
 
 class Database(Session):
+    """
+    要提供几个交插的方法
+    """
     def __init__(self, engine=e):
         self.engine = engine
         super().__init__(engine)

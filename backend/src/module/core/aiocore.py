@@ -101,6 +101,7 @@ class AsyncDownload(AsyncProgram):
     async def download_task_loop(self):
         while True:
             await self.download_task()
+            await asyncio.sleep(10)
 
     async def download_task(self):
         try:

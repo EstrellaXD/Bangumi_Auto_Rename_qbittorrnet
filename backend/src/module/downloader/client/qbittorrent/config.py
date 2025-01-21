@@ -2,7 +2,6 @@ from pydantic import BaseModel, Field, validator
 
 
 class Config(BaseModel):
-    type: str = Field(default="qbittorrent", description="Downloader type")
     host: str = Field(
         default="http://172.17.0.1:8080", alias="host", description="Downloader host"
     )
@@ -12,15 +11,6 @@ class Config(BaseModel):
     password: str = Field(
         default="adminadmin", alias="password", description="Downloader password"
     )
-    path: str = Field(default="/Downloads/Bangumi", description="Downloader path")
-    ssl: bool = Field(default=False, description="Downloader ssl")
-
-    @validator("host", pre=True)
-    def validate_host(cls, value: str) -> str:
-        # 如果输入值没有以 http:// 或 https:// 开头，自动加上 http://
-        if not value.startswith(("http://", "https://")):
-            value = f"http://{value}"
-        return value
 
 
 if __name__ == "__main__":

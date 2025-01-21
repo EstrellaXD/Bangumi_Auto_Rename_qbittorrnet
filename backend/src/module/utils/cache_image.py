@@ -1,13 +1,9 @@
 import asyncio
 import base64
-import sys
 from os.path import isfile
+from pathlib import Path
 
-if sys.platform == "win32":
-    from pathlib import PureWindowsPath as Path
-else:
-    from pathlib import Path
-
+#TODO: 移动到 network 模块下, 这里要用到 setting.proxy, 但是这里用到 network 会导致循环引用
 
 def url_to_str(url):
     """

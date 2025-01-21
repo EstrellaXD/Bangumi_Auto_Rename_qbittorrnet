@@ -10,9 +10,13 @@ logger = logging.getLogger(__name__)
 
 
 class PostNotification:
+    """
+    对通知进行处理, 调用 setting 的 notification
+    """
 
     def __init__(self) -> None:
         chat_ids = settings.notification.chat_id.split(",")
+        # 支持 多通知帐户
         self.notifier = [
             Notifier(
                 token=settings.notification.token,
@@ -33,6 +37,11 @@ class PostNotification:
 
     @staticmethod
     def _get_poster(notify: Notification):
+        """
+        有可能传过来的是没有海报的番剧
+        比如 collection 的番剧
+        获取番剧海报
+        """
         with Database() as db:
             poster_path = db.bangumi.match_poster(notify.title)
         notify.poster_path = poster_path

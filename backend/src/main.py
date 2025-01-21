@@ -1,20 +1,16 @@
 import logging
 import os
-import sys
+from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+
 from module.api import lifespan, v1
 from module.conf import VERSION, settings, setup_logger
 from module.utils import load_image
-
-if sys.platform == "win32":
-    from pathlib import PureWindowsPath as Path
-else:
-    from pathlib import Path
 
 setup_logger(reset=True)
 logger = logging.getLogger(__name__)
@@ -47,6 +43,7 @@ app = create_app()
 
 @app.get("/posters/{path:path}", tags=["posters"])
 async def posters(path: str):
+    # TODO: 肯定在这里是不合适的
     post_path = Path("data/posters") / path
     if not post_path.exists():
         await load_image(path)
@@ -67,9 +64,7 @@ if VERSION != "DEV_VERSION":
         else:
             context = {"request": request}
             return templates.TemplateResponse("index.html", context)
-
 else:
-
     @app.get("/", status_code=302, tags=["html"])
     def index():
         return RedirectResponse("/docs")

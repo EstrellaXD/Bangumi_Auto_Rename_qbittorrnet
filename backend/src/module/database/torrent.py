@@ -99,6 +99,11 @@ class TorrentDatabase:
         return new_torrents
 
     def delete(self, _id: int) -> bool:
+        # 思考什么时候删除种子
+        # 1. 当bangumi已经删除时, 如果删除,会在重命名的时候再次添加
+        # 2. 当种子也删除时, 不会再次添加
+        # 3. bangumi 删除有几种情况: 1. 有一个全清, 会刷新一次 2. 用户自已删除, 如果是聚合的, 会在下次
+        # 刷新时再次添加, 如果是单独的, 会连着rss 一起删除
         condition = delete(Torrent).where(Torrent.id == _id)
         try:
             self.session.exec(condition)

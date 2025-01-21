@@ -6,12 +6,14 @@ from .bangumi import Bangumi
 
 class Torrent(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True, alias="id")
+    # FIXME: bangumi_id 会不停的变化，每改一次都要改这里, 所以考虑用 official_title 作为主码
     bangumi_id: int | None = Field(
         default=None, alias="refer_id", foreign_key="bangumi.id"
     )
+    # FIXME: rss_id 会不停的变化，每改一次都要改这里, 所以考虑用 rss_link 作为主码
     rss_id: int | None = Field(default=None, alias="rss_id", foreign_key="rssitem.id")
     name: str = Field(default="", alias="name")
-    url: str = Field("https://example.com/torrent", alias="url", unique=True)
+    url: str = Field(default="https://example.com/torrent", alias="url", unique=True)
     homepage: str | None = Field(default=None, alias="homepage")
     downloaded: bool = Field(default=False, alias="downloaded")
 

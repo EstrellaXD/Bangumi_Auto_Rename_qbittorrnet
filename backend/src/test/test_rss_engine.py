@@ -1,4 +1,5 @@
 import pytest
+
 from module.database import Database
 from module.rss import RSSEngine, RSSManager
 

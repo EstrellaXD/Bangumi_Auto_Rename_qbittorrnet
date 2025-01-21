@@ -1,17 +1,16 @@
 import logging
 
 from module.models import Notification
+from module.notification.plugin.base_notification import BaseNotification
 
 logger = logging.getLogger(__name__)
 
 
-class LogNotification():
+class LogNotification(BaseNotification):
 
     def __init__(self, token, **kwargs):
         super().__init__()
-        self.token = token
-        self.notification_url = "https://api.day.app/push"
 
     async def post_msg(self, notify: Notification) -> bool:
-        logger.info(f"{notify.message}")
+        logger.info(f"[Notification] {notify.message}")
         return True

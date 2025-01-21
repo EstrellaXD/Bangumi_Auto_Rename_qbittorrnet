@@ -7,7 +7,6 @@ from module.network import RequestContent
 class RSSManager():
     def __init__(self, _engine=engine):
         self.engine = _engine
-        # super().__init__(engine=_engine)
 
     async def add_rss(
         self,

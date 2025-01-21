@@ -8,6 +8,11 @@ logger = logging.getLogger(__name__)
 
 
 class RSSDatabase:
+    """
+    RSS 是一切的开始, bangumi 和 torrent 都以 rss 为外键
+    rss 的主码是 rss_link, id
+    现在是 rss 的 id 变动时, bangumi 和 torrent 的 rss_id 也要变动
+    """
     def __init__(self, session: Session):
         self.session = session
 

@@ -1,13 +1,9 @@
 import logging
+from pathlib import Path
 
-from module.conf import PLATFORM
 from module.models import EpisodeFile, SubtitleFile
 from module.parser.analyser.raw_parser import RawParser
 
-if PLATFORM == "Windows":
-    from pathlib import PureWindowsPath as Path
-else:
-    from pathlib import Path
 logger = logging.getLogger(__name__)
 
 SUBTITLE_LANG = {

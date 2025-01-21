@@ -10,18 +10,28 @@ logger = logging.getLogger(__name__)
 
 
 class BangumiDatabase:
+    """
+    TODO: 对 Bangumi 的一些新想法
+    主键为 official_title, link, 季度
+    判断一个 torrent name 是不是在 bangumi 里面
+    先通过 name, link 来找一下, 然后看看季度有没有
+    有一点问题是 现在有了一个 bangumi, 但是季度是改过的(如物语系列)
+    当有俩个的时候, 一个已经加进去了, 另外一个没有,
+    这时候会去解析, 由于季度不一样, 会被认为是多个 bangumi
+    所以默认同一个 link 内的季度是一样的
+
+    #FIXME :
+    这就有了新问题, 在一个动漫连续多个季度的时候, 会被认为是同一个动漫
+    一个暂时的解决方案是, 通过 season_raw 来判断, 如果当前存在一个季度更大的, 就不添加
+    #ERROR : 这就会导致一个sb 的动漫是 S2 但是 TMDB 分到了 S1, 导致多加一个
+    有大选大, 没有大再看看 mikan/tmdb 给的是什么
+    """
     def __init__(self, session: Session):
         self.session = session
 
     def add(self, data: Bangumi):
         """link 相同, official_title相同,就只补充,主要是为了
         一些会改名的
-
-        Args:
-            data: [TODO:description]
-
-        Returns:
-            [TODO:return]
         """
         # 如果official_title 一致,将title_raw,group,更新
         statement = select(Bangumi).where(

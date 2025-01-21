@@ -3,6 +3,7 @@ import logging
 
 from module.database import Database, engine
 from module.downloader import DownloadClient
+from module.downloader import Client as client
 from module.manager.renamer import Renamer
 from module.models import Bangumi, BangumiUpdate, ResponseModel
 from module.parser import TmdbParser
@@ -22,7 +23,7 @@ class TorrentManager:
         Returns:
             [
         """
-        async with DownloadClient() as client:
+        async with client:
             torrents = await client.get_torrent_info(status_filter=None)
         return [
             torrent["hash"]
@@ -30,37 +31,38 @@ class TorrentManager:
             if torrent["save_path"] == data.save_path
         ]
 
-    async def delete_torrents(self, data: Bangumi, client: DownloadClient):
-        data.save_path = client._path_parser.gen_save_path(data)
-        hash_list = await self.__match_torrents_list(data)
-        if hash_list:
-            await client.delete_torrent(hash_list)
-            with Database() as database:
-                for _hash in hash_list:
-                    if torrent_item := database.torrent.search_hash(_hash):
-                        database.torrent.delete(torrent_item.id)
+    async def delete_torrents(self, data: Bangumi):
+        async with client:
+            data.save_path = client._path_parser.gen_save_path(data)
+            hash_list = await self.__match_torrents_list(data)
+            if hash_list:
+                await client.delete_torrent(hash_list)
+                with Database() as database:
+                    for _hash in hash_list:
+                        if torrent_item := database.torrent.search_hash(_hash):
+                            database.torrent.delete(torrent_item.id)
 
-            logger.info(f"Delete rule and torrents for {data.official_title}")
-            return ResponseModel(
-                status_code=200,
-                status=True,
-                msg_en=f"Delete rule and torrents for {data.official_title}",
-                msg_zh=f"删除 {data.official_title} 规则和种子",
-            )
-        else:
-            return ResponseModel(
-                status_code=406,
-                status=False,
-                msg_en=f"Can't find torrents for {data.official_title}",
-                msg_zh=f"无法找到 {data.official_title} 的种子",
-            )
+                logger.info(f"Delete rule and torrents for {data.official_title}")
+                return ResponseModel(
+                    status_code=200,
+                    status=True,
+                    msg_en=f"Delete rule and torrents for {data.official_title}",
+                    msg_zh=f"删除 {data.official_title} 规则和种子",
+                )
+            else:
+                return ResponseModel(
+                    status_code=406,
+                    status=False,
+                    msg_en=f"Can't find torrents for {data.official_title}",
+                    msg_zh=f"无法找到 {data.official_title} 的种子",
+                )
 
     async def delete_rule(self, _id: int | str, file: bool = False):
         with Database(engine) as db:
             data = db.bangumi.search_id(int(_id))
             torrent_message = None
         if isinstance(data, Bangumi):
-            async with DownloadClient() as client:
+            async with client:
                 with Database(engine) as db:
                     # bangumi 删了怎么删 rss?
                     # db.rss.delete(data.official_title)
@@ -70,7 +72,7 @@ class TorrentManager:
                         db.rss.delete(rss_item.id)
 
                 if file:
-                    torrent_message = await self.delete_torrents(data, client)
+                    torrent_message = await self.delete_torrents(data)
                 logger.info(f"[Manager] Delete rule for {data.official_title}")
             return data, torrent_message
         return None, None
@@ -79,12 +81,12 @@ class TorrentManager:
         with Database() as db:
             data = db.bangumi.search_id(int(_id))
         if isinstance(data, Bangumi):
-            async with DownloadClient() as client:
+            async with client:
                 # client.remove_rule(data.rule_name)
                 data.deleted = True
                 db.bangumi.update(data)
                 if file:
-                    torrent_message = await self.delete_torrents(data, client)
+                    torrent_message = await self.delete_torrents(data)
                     return torrent_message
                 logger.info(f"[Manager] Disable rule for {data.official_title}")
                 return ResponseModel(
@@ -126,12 +128,11 @@ class TorrentManager:
     async def rename(self, data: Bangumi, save_path, hash_list):
         renamer = Renamer()
         renamer_task = []
-        async with DownloadClient() as client:
+        async with client:
             for torrent_hash in hash_list:
-                file_contents = await renamer.gen_file_path(client, torrent_hash)
+                file_contents = await renamer.gen_file_path(torrent_hash)
                 renamer_task.append(
                     renamer.rename_files(
-                        client,
                         torrent_hash,
                         files_path=file_contents,
                         save_path=save_path,
@@ -151,7 +152,7 @@ class TorrentManager:
                 ):
                     # 名字改了, 年份改了, 季改了
                     # Move torrent
-                    async with DownloadClient() as client:
+                    async with client:
                         old_data.save_path = client._path_parser.gen_save_path(old_data)
                         hash_list = await self.__match_torrents_list(old_data)
                         new_save_path = client._path_parser.gen_save_path(data)

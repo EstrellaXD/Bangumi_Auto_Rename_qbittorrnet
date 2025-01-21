@@ -10,12 +10,17 @@ import importlib
 import logging
 
 from module.conf import settings
+from module.notification.plugin.base_notification import BaseNotification
 
 logger = logging.getLogger(__name__)
 
-notification_type = settings.notification.type
-package_path = f"module.notification.plugin.{notification_type}"
-notification = importlib.import_module(package_path)
+if settings.notification.enable:
+    notification_type = settings.notification.type
+    package_path = f"module.notification.plugin.{notification_type}"
+else:
+    package_path = "module.notification.plugin.log_notification"
+
+notification: BaseNotification = importlib.import_module(package_path)
 Notification = notification.Notification
 
 

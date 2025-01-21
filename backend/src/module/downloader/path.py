@@ -3,26 +3,20 @@ import re
 from functools import lru_cache
 from os import PathLike
 
-from module.conf import get_plugin_config, settings
-from module.downloader.client import Downloader
+from module.conf import settings
 from module.models import Bangumi, BangumiUpdate
 
+if r"//" in settings.downloader.path:
+    from pathlib import PureWindowsPath as Path
+else:
+    from pathlib import Path
 logger = logging.getLogger(__name__)
 
 
 class TorrentPath:
 
-    def __init__(self):
-        self.config = get_plugin_config(Downloader.config, "downloader")
-
-        if r"//" in self.config.path:
-            from pathlib import PureWindowsPath as Path
-        else:
-            from pathlib import Path
-        self.Path = Path
-
     def check_file(self, file_path: PathLike[str] | str):
-        suffix = self.Path(file_path).suffix
+        suffix = Path(file_path).suffix
         if suffix.lower() in [".mp4", ".mkv"]:
             return "media"
         elif suffix.lower() in [".ass", ".srt"]:
@@ -43,8 +37,8 @@ class TorrentPath:
     def path_to_bangumi(self, save_path: PathLike[str] | str):
 
         # Split save path and download path
-        save_path = self.Path(save_path)
-        download_path = self.Path(settings.downloader.path)
+        save_path = Path(save_path)
+        download_path = Path(settings.downloader.path)
         bangumi_name = ""
         season = 0
         try:
@@ -64,7 +58,7 @@ class TorrentPath:
         return bangumi_name, season
 
     def _file_depth(self, file_path: PathLike[str] | str):
-        return len(self.Path(file_path).parts)
+        return len(Path(file_path).parts)
 
     def is_ep(self, file_path: PathLike[str] | str):
         return self._file_depth(file_path) <= 2
@@ -74,7 +68,7 @@ class TorrentPath:
             f"{data.official_title} ({data.year})" if data.year else data.official_title
         )
         save_path = (
-            self.Path(settings.downloader.path) / folder / f"Season {data.season}"
+            Path(settings.downloader.path) / folder / f"Season {data.season}"
         )
         return str(save_path)
 
@@ -88,4 +82,4 @@ class TorrentPath:
         return rule_name
 
     def _join_path(self, *args):
-        return str(self.Path(*args))
+        return str(Path(*args))
