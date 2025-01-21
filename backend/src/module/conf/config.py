@@ -58,20 +58,20 @@ def check_config_key(
     if isinstance(data, BaseModel):
         data = data.dict()
     updated_data = updated_data.dict()
-    if set(updated_data.keys()) != set(data.keys()):
-        return False
+    for key in updated_data.keys():
+        if key not in data:
+            return False
     return True
 
 
 def get_plugin_config(config: BaseModel, config_name: str) -> BaseModel:
     """从全局配置获取当前插件需要的配置项，更新 data 中的缺失项。"""
-    globel_data = model_dump(settings)
-    # print(f"globel_data: {globel_data}")
-    data = globel_data.get(config_name, {})
+    global_data = model_dump(settings)
+    data = global_data.get(config_name, {})
     # data 可能是 dict 和 BaseModel 的实例
-    # print(f"data: {data}")
+    # 尝试从配置文件中读取配置, 如果不足则使用默认配置
     updated_data = update_config(config, data)
-    # 如果更新后的数据是默认的，更新settings
+    # 如果有一些字段不在配置文件中,则将其添加到配置文件中
     if not check_config_key(data, updated_data, config_name):
         update_config(settings, {config_name: updated_data})
         settings.save()
@@ -93,11 +93,6 @@ def update_config(baseconfig: BaseModel | dict, data: dict):
     """
     # 部份更新 Config
     # # 获取 baseconfig 的当前字段数据
-    # print("--------------------------------")
-    # print("baseconfig", baseconfig)
-    # print("data", data)
-    # print(f"type(baseconfig): {type(baseconfig)}")
-    # print(f"type(data): {type(data)}")
     if isinstance(baseconfig, BaseModel):
         updated_data = baseconfig.dict()
         updated_data = deep_update(updated_data, data)
@@ -142,10 +137,6 @@ class Settings(Config):
         with open(CONFIG_PATH, "r", encoding="utf-8") as f:
             config = json.load(f)
         update_config(self, config)
-        # print(self.__dict__)
-        # config_obj = Config.model_validate(config)
-
-        # self.__dict__.update(config_obj.__dict__)
         logger.info("Config loaded")
 
     def save(self, config_dict: dict | None = None):

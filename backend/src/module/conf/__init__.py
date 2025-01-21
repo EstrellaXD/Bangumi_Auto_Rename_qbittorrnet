@@ -1,14 +1,11 @@
 import sys
+from pathlib import Path
 
 from .config import VERSION, get_plugin_config, settings
 from .log import LOG_PATH, setup_logger
 from .search_provider import SEARCH_CONFIG
 
 PLATFORM = sys.platform
-if PLATFORM == "win32":
-    from pathlib import PureWindowsPath as Path
-else:
-    from pathlib import Path
 TMDB_API = "291237f90b24267380d6176c98f7619f"
 DATA_PATH = "sqlite:///data/data.db"
 LEGACY_DATA_PATH = Path("data/data.json")
@@ -28,4 +25,5 @@ __all__ = [
     "PLATFORM",
     "setup_logger",
     "settings",
+    "get_plugin_config",
 ]

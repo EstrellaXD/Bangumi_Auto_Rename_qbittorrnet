@@ -19,4 +19,4 @@ def load_provider():
         return DEFAULT_PROVIDER
 
 
-SEARCH_CONFIG = load_provider()
+SEARCH_CONFIG: dict[str, str] = load_provider()
