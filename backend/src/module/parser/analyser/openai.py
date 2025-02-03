@@ -109,7 +109,7 @@ class OpenAIParser:
 
         if asdict:
             try:
-                result = json.loads(result)
+                result = json.loads(result[result.index("{"):result.rindex("}") + 1])    # find the first { and last } for better compatibility
             except json.JSONDecodeError:
                 logger.warning(f"Cannot parse result {result} as python dict.")
 
